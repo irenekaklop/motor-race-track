@@ -15,7 +15,7 @@
 #define THRESH3 35
 #define THRESH4 70
 #define THRESH5 120
-
+#define M_PI 3.1415926535897932384626433832795
 
 using namespace std;
 
@@ -81,3 +81,6 @@ void Down();
 void Left();
 void Right();
 void crash(const char*, float);
+
+void Track(int x, int y, int z);
+static void torus(float inner, float outer, unsigned int pts);

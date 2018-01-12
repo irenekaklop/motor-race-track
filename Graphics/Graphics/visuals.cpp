@@ -1,4 +1,5 @@
 #include "visuals.h"
+#include <cmath>
 
 
 model car;
@@ -16,6 +17,19 @@ bool crashFlag = false;
 
 using namespace std;
 
+void axes()
+{
+	glColor3f(0.6, 0.6, 0.6);
+	glPushMatrix();
+	glTranslatef(0, 0, -1.0);
+	glBegin(GL_LINES);
+	glVertex2f(0.0, 0.0);
+	glVertex2f(100.0, 0.0);
+	glVertex2f(0.0, 0.0);
+	glVertex2f(0.0, 100.0);
+	glEnd();
+	glPopMatrix();
+}
 
 void Render()
 {
@@ -35,8 +49,22 @@ void Render()
 	DisplayCar(car);
 	glPopMatrix();
 	*/
-	
+
 	glPushMatrix();
+	glTranslatef(0, 25, -75);
+	
+	glColor3f(1.0, 0.2, 0.2);
+	torus(2, 3, 20);
+
+	glPopMatrix();
+	
+	//Track
+	/*Track(40, -25, 35);
+	Track(30, 20, 30);*/
+
+
+	/*Light*/
+	/*glPushMatrix();
 	glTranslatef(0, 0, -100);
 	glTranslatef(tx, 0, 0.0);
 	//glRotatef(45, 0, 1, 0);
@@ -45,9 +73,8 @@ void Render()
 	glColor3f(1.0, 1.0, 1.0);                            // Set drawing colour
 	DisplayLight(light);
 	glPopMatrix();
-	
-
 	glPushMatrix();
+
 	if (crashFlag) {
 		//CRASH
 		//-7.04769, -2.56515			Es
@@ -99,7 +126,7 @@ void Render()
 		glEnd();
 		crash("CRASH!", 0.05f);
 	}
-	glPopMatrix();
+	glPopMatrix();*/
 	
 
 	glutSwapBuffers();             // All drawing commands applied to the 
@@ -121,7 +148,9 @@ void Resize(int w, int h)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
-	gluPerspective(60.0, (float)w / (float)h, 1.0, 1000.0);
+	//glOrtho (-50.0f, 50.0f, -50.0f, 50.0f,-1000.0f,1000.0f);
+	float aspect = (float)w / (float)h;
+	gluPerspective(60.0, aspect, 1.0, 1000.0);
 }
 
 
@@ -175,6 +204,38 @@ void Setup()  // TOUCH IT !!
 	// Black background
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
+}
+
+static void torus(float inner, float outer, unsigned int pts)
+{
+	glBegin(GL_QUAD_STRIP);
+	
+	for (unsigned int i = 0; i <= pts/2; ++i)
+	{
+		float angle = (i / (float)pts) * 3.14159f * 2.0f;
+		glVertex2f(inner * cos(angle), inner * sin(angle));
+		glVertex2f(outer * cos(angle), outer * sin(angle));
+	}
+	glEnd();
+}
+
+void Track(int x, int y, int z) {
+	/*Track*/
+
+	glPushMatrix();
+	glTranslatef(0, 0, -75);
+	glColor3f(0, 0, 1.0);
+	glPointSize(5);
+	glBegin(GL_POLYGON);
+
+	glVertex3f(-x, y, -z);
+	glVertex3f(x, y, -z);
+	glVertex3f(x, y, z-10);
+	glVertex3f(-x, y, z-10);
+
+	glEnd();
+
+	glPopMatrix();
 }
 
 
