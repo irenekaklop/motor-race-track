@@ -12,9 +12,9 @@
 
 #define THRESH1 5
 #define THRESH2 15
-#define THRESH2 35
-#define THRESH2 70
-#define THRESH2 120
+#define THRESH3 35
+#define THRESH4 70
+#define THRESH5 120
 
 
 using namespace std;
