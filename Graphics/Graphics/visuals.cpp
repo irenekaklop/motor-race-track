@@ -50,13 +50,10 @@ void Render()
 	glPopMatrix();
 	*/
 
-	glPushMatrix();
-	glTranslatef(0, 25, -75);
-	
-	glColor3f(1.0, 0.2, 0.2);
-	torus(2, 3, 20);
 
-	glPopMatrix();
+
+	torus(50, 20, 30);
+
 	
 	//Track
 	/*Track(40, -25, 35);
@@ -208,6 +205,13 @@ void Setup()  // TOUCH IT !!
 
 static void torus(float inner, float outer, unsigned int pts)
 {
+	glPushMatrix();
+	glTranslatef(-30, -40, -200);
+
+	glColor3f(1.0, 0, 0);
+	glRotatef(90, 1.0, 0, 0);
+	glRotatef(90, 0, 0, 1.0);
+
 	glBegin(GL_QUAD_STRIP);
 	
 	for (unsigned int i = 0; i <= pts/2; ++i)
@@ -217,6 +221,9 @@ static void torus(float inner, float outer, unsigned int pts)
 		glVertex2f(outer * cos(angle), outer * sin(angle));
 	}
 	glEnd();
+
+	glPopMatrix();
+
 }
 
 void Track(int x, int y, int z) {
