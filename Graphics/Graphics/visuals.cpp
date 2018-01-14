@@ -1,35 +1,26 @@
 #include "visuals.h"
+#include "time.h"
 
 
 
-model car;
+model compCar;
+model userCar;
 model light;
+
+carMovement compCarM;
+carMovement userCarM;
 
 bool fullscreen = false;
 
-bool leftFlag = false;
-bool rightFlag = true;
-bool firstTime = false;
-
 bool crashFlag = false;
 
-float R = 25;
-float C1x = 75;
-float C2x = -75;
-float Cz = -110;
-float origRot = 180;
-float origTx;
-float origTz;
-float omega;
-float theta;
-float time = 0;
+float R1 = 15;
+float R2 = 10;
+float C1x = 20;
+float C2x = -20;
+float Cz = -30;
 
-float tx = 0.0;
-float tz = Cz+R;
-float acc = 3;
-float rotx = 270.0;
-float roty = 180;
-
+float acc = 0.5f;
 
 
 // angle of rotation for the camera direction
@@ -67,17 +58,34 @@ void Render()
 	
 	gluLookAt(x, 1.0f, z, x + lx, 1.0f, z + lz, 0.0f, 1.0f, 0.0f);
 
+	cout << time(NULL) << endl;
+
+	glPushMatrix();
+	glTranslatef(userCarM.tx, 0, userCarM.tz);
+	glRotatef(userCarM.roty, 0, 90, 0);
+	glRotatef(userCarM.rotx, 180, 0, 0);
+	glScalef(0.01f, 0.01f, 0.01f);
+	glColor3f(1.0, 1.0, 1.0);                            // Set drawing colour
+	DisplayCar(userCar);
+	
+	RenderUserCar();
+
+	glPopMatrix();
 
 
 	glPushMatrix();
-	glTranslatef(tx, 0, tz);
-	glRotatef(roty, 0, 90, 0);
-	glRotatef(rotx, 180, 0, 0); 
-	glScalef(0.05f, 0.05f, 0.05f);
+	glTranslatef(compCarM.tx, 0, compCarM.tz);
+	glRotatef(compCarM.roty, 0, 90, 0);
+	glRotatef(compCarM.rotx, 180, 0, 0);
+	glScalef(0.01f, 0.01f, 0.01f);
 	glColor3f(1.0, 1.0, 1.0);                            // Set drawing colour
-	DisplayCar(car);
-	
-	
+	DisplayCar(compCar);
+
+	RenderCompCar();
+
+	glPopMatrix();
+
+	/*
 	if (tx >= C1x) {
 		rightCycle();
 	}
@@ -103,9 +111,9 @@ void Render()
 		}
 	}
 	glPopMatrix();
+	*/
 
-
-	torus(50, 20, 30);
+	//torus(50, 20, 30);
 
 	
 	//Track
@@ -186,7 +194,8 @@ void Idle()
 
 void Setup()  // TOUCH IT !! 
 {
-	ReadFileCar(&car);
+	ReadFileCar(&userCar);
+	ReadFileCar(&compCar);
 	ReadFileLight(&light);
 
 	//Parameter handling
@@ -223,6 +232,27 @@ void Setup()  // TOUCH IT !!
 
 	// Black background
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+
+	compCarM.leftFlag = false;
+	compCarM.rightFlag = true;
+	compCarM.firstTime = false;
+	compCarM.tx = 0.0;
+	compCarM.tz = Cz + R2;
+	compCarM.acc = 2.5;
+	compCarM.rotx = 270.0;
+	compCarM.roty = 180;
+	compCarM.origRot = 180;
+
+	userCarM.leftFlag = false;
+	userCarM.rightFlag = true;
+	userCarM.firstTime = false;
+	userCarM.tx = 0.0;
+	userCarM.tz = Cz + R1;
+	userCarM.acc = 2.5;
+	userCarM.rotx = 270.0;
+	userCarM.roty = 180;
+	userCarM.origRot = 180;
 	
 }
 
@@ -494,7 +524,7 @@ void Keyboard(unsigned char key, int x, int y)
 
 
 void Arrows(int key, int x, int y) {
-	/*
+	
 	switch (key) {
 	case GLUT_KEY_UP:
 		Up();
@@ -502,15 +532,12 @@ void Arrows(int key, int x, int y) {
 	case GLUT_KEY_DOWN:
 		Down();
 		break;
-	case GLUT_KEY_LEFT:
-		//Left();
-		break;
-	case GLUT_KEY_RIGHT:
-		//Right();
+	default:
 		break;
 	}
-	*/
+	
 
+	/*
 	float fraction = 1.0f;
 
 	switch (key) {
@@ -533,104 +560,165 @@ void Arrows(int key, int x, int y) {
 		z -= lz * fraction;
 		break;
 	}
+	*/
 }
 
 
 void Up() {
-	acc += 0.1;
+	userCarM.acc += acc;
 }
 
 
 void Down() {
-	acc -= 0.1f;
+	userCarM.acc -= acc;
 }
 
 
-void rightCycle() {
-	if (!firstTime) {
-		firstTime = true;
-		origTx = C1x;
-		origTz = Cz+R;
-		origRot = 180;
-		if (tx > origTx) {
-			theta = (tx - origTx) / R;
+void rightCycle(carMovement* car, float R) {
+	if (!car->firstTime) {
+		car->firstTime = true;
+		car->origTx = C1x;
+		car->origTz = Cz+R;
+		car->origRot = 180;
+		if (car->tx > car->origTx) {
+			car->theta = (car->tx - car->origTx) / R;
 		}
 		else{
-			omega = acc / R;
-			theta = omega;
+			car->omega = car->acc / R;
+			car->theta = car->omega;
 		}
 	}
 	else {
-		omega = acc / R;
-		theta += omega;
+		car->omega = car->acc / R;
+		car->theta += car->omega;
 	}
 
-	tx = origTx + (R * sin(theta));
+	car->tx = car->origTx + (R * sin(car->theta));
 
-	if (!leftFlag && theta>PI/2) {
-		leftFlag = true;
-		rightFlag = false;
-		origTz = Cz;
+	if (!car->leftFlag && car->theta>PI/2) {
+		car->leftFlag = true;
+		car->rightFlag = false;
+		car->origTz = Cz;
 	}
 
-	if (theta <= PI/2) {
-		tz = origTz - R * cos(3*PI/2 + theta);
+	if (car->theta <= PI/2) {
+		car->tz = car->origTz - R * cos(3*PI/2 + car->theta);
 	}
 	else{
-		tz = origTz - (R - R * cos(3*PI/2 + theta));
+		car->tz = car->origTz - (R - R * cos(3*PI/2 + car->theta));
 	}
 
-	roty = origRot + theta*180/PI;
+	car->roty = car->origRot + car->theta*180/PI;
 
-	if (roty > 360) {
-		tx = C1x - ((2 * PI*R*(roty - 360)) / 360);
-		tz = Cz - R;
-		roty = 0;
+	if (car->roty > 360) {
+		car->tx = C1x - ((2 * PI*R*(car->roty - 360)) / 360);
+		car->tz = Cz - R;
+		car->roty = 0;
 	}
 
 }
 
 
-void leftCycle() {
-	if (!firstTime) {
-		firstTime = true;
-		origTx = C2x;
-		origTz = Cz-R;
-		origRot = 0;
-		if (tx < origTx) {
-			theta = (origTx - tx)/R;
+void leftCycle(carMovement *car, float R) {
+	if (!car->firstTime) {
+		car->firstTime = true;
+		car->origTx = C2x;
+		car->origTz = Cz-R;
+		car->origRot = 0;
+		if (car->tx < car->origTx) {
+			car->theta = (car->origTx - car->tx)/R;
 		}
 		else {
-			omega = acc / R;
-			theta = omega;
+			car->omega = car->acc / R;
+			car->theta = car->omega;
 		}
 	}
 	else{
-		omega = acc / R;
-		theta += omega;
+		car->omega = car->acc / R;
+		car->theta += car->omega;
 	}
 
-	if (!rightFlag && theta > PI/2) {
-		rightFlag = true;
-		leftFlag = false;
-		origTz = Cz;
+	if (!car->rightFlag && car->theta > PI/2) {
+		car->rightFlag = true;
+		car->leftFlag = false;
+		car->origTz = Cz;
 	}
 
-	tx = origTx - (R * sin(theta));
+	car->tx = car->origTx - (R * sin(car->theta));
 
-	if (theta <= PI/2) {
-		tz = origTz + R * cos(3*PI/2 + theta);
+	if (car->theta <= PI/2) {
+		car->tz = car->origTz + R * cos(3*PI/2 + car->theta);
 	}
 	else {
-		tz = origTz + (R - R * cos(3*PI/2 + theta));
+		car->tz = car->origTz + (R - R * cos(3*PI/2 + car->theta));
 	}
 	
-	roty = origRot + theta*180/PI;
+	car->roty = car->origRot + car->theta*180/PI;
 
-	if (roty > 180) {
-		tx = C2x + ((2 * PI*R*(roty - 180)) / 360);
-		tz = Cz + R;
-		roty = 180;
+	if (car->roty > 180) {
+		car->tx = C2x + ((2 * PI*R*(car->roty - 180)) / 360);
+		car->tz = Cz + R;
+		car->roty = 180;
+	}
+}
+
+
+void RenderUserCar() {
+	if (userCarM.tx >= C1x) {
+		rightCycle(&userCarM, R1);
+	}
+	else if (userCarM.tx <= C2x) {
+		leftCycle(&userCarM, R1);
+	}
+	else {
+		if (userCarM.firstTime) {
+			userCarM.firstTime = false;
+		}
+		if (userCarM.rightFlag) {
+			userCarM.tx += userCarM.acc;
+			if (userCarM.tx > C1x) {
+				rightCycle(&userCarM, R1);
+			}
+		}
+		if (userCarM.leftFlag) {
+			userCarM.tx -= userCarM.acc;
+			if (userCarM.tx < C2x) {
+				leftCycle(&userCarM, R1);
+			}
+
+		}
+	}
+}
+
+
+void RenderCompCar() {
+	//to stop with traffic light
+
+	//
+	
+	if (compCarM.tx >= C1x) {
+		rightCycle(&compCarM, R2);
+	}
+	else if (compCarM.tx <= C2x) {
+		leftCycle(&compCarM, R2);
+	}
+	else {
+		if (compCarM.firstTime) {
+			compCarM.firstTime = false;
+		}
+		if (compCarM.rightFlag) {
+			compCarM.tx += compCarM.acc;
+			if (compCarM.tx > C1x) {
+				rightCycle(&compCarM, R2);
+			}
+		}
+		if (compCarM.leftFlag) {
+			compCarM.tx -= compCarM.acc;
+			if (compCarM.tx < C2x) {
+				leftCycle(&compCarM, R2);
+			}
+
+		}
 	}
 }
 

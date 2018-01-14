@@ -47,6 +47,27 @@ struct model
 	vector<face> faces;
 };
 
+struct carMovement {
+	//movement variables for the model
+	float tx;
+	float tz;
+	float acc;
+	float rotx;
+	float roty;
+
+	//flag variables for the type of movement
+	bool leftFlag;
+	bool rightFlag;
+	bool firstTime;
+
+	//saved values for easier circular motion
+	float origRot;
+	float origTx;
+	float origTz;
+	float omega;
+	float theta;
+};
+
 
 //-------- Functions --------------------------------
 
@@ -68,17 +89,19 @@ void Idle();
 void ReadFileCar(model*);
 void ReadFileLight(model*);
 
-
 void DisplayCar(model);
 void DisplayLight(model);
+
+void RenderUserCar();
+void RenderCompCar();
 
 void Keyboard(unsigned char, int, int);
 void Arrows(int, int, int);
 
 void Up();
 void Down();
-void rightCycle();
-void leftCycle();
+void rightCycle(carMovement*, float);
+void leftCycle(carMovement*, float);
 void crash(const char*, float);
 
 
