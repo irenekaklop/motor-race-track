@@ -1,5 +1,5 @@
 #include "visuals.h"
-#include <cmath>
+
 
 
 model car;
@@ -77,7 +77,6 @@ void Render()
 	glScalef(0.05f, 0.05f, 0.05f);
 	glColor3f(1.0, 1.0, 1.0);                            // Set drawing colour
 	DisplayCar(car);
-<<<<<<< HEAD
 	
 	
 	if (tx >= C1x) {
@@ -178,11 +177,10 @@ void Render()
 	}
 	glPopMatrix();
 
-	//time += 1;
 
 	/*
 	glPushMatrix();
-=======
+
 	glPopMatrix();
 	*/
 
@@ -198,7 +196,7 @@ void Render()
 
 	/*Light*/
 	/*glPushMatrix();
->>>>>>> origin/master
+
 	glTranslatef(0, 0, -100);
 	//glRotatef(45, 0, 1, 0);
 	//glRotatef(rotx, 180, 0, 0);
@@ -206,7 +204,7 @@ void Render()
 	glColor3f(0.749020, 0.749020, 0.749020);                            // Set drawing colour
 	DisplayLight(light);
 	glPopMatrix();
-<<<<<<< HEAD
+
 	*/
 	
 	glPushMatrix();
@@ -227,9 +225,9 @@ void Render()
 	glEnd();
 	glPopMatrix();
 	
-=======
+
 	glPushMatrix();
->>>>>>> origin/master
+
 
 	if (crashFlag) {
 		//CRASH
@@ -286,11 +284,6 @@ void Render()
 		crash("CRASH!", 0.05f);
 		//glPopMatrix();
 	}
-<<<<<<< HEAD
-
-=======
-	glPopMatrix();*/
->>>>>>> origin/master
 	
 
 	glutSwapBuffers();             // All drawing commands applied to the 
@@ -697,32 +690,13 @@ void Arrows(int key, int x, int y) {
 
 
 void Up() {
-
 	acc += 0.1;
-	//tx -= acc;
-	//acc += 0.1f;
-	//float alpha = 0.0f;
-	//float start = tx;
-	//float end = tx - acc;
-	//do {
-	//	alpha += 0.025f;
-	//	tx = (1 - alpha)*start + alpha * end;
-	//} while (alpha < 1.0);
 }
 
 
 void Down() {
 	acc -= 0.1f;
 }
-
-
-//void Left() {
-//	roty += 5;
-//}
-
-//void Right() {
-//	roty -= 5;
-//}
 
 
 void rightCycle() {

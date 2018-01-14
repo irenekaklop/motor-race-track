@@ -10,16 +10,10 @@
 
 #include "gl/glut.h"   // - An interface and windows management library
 
-<<<<<<< HEAD
+
 #define PI 3.14159265
-=======
-#define THRESH1 5
-#define THRESH2 15
-#define THRESH3 35
-#define THRESH4 70
-#define THRESH5 120
 #define M_PI 3.1415926535897932384626433832795
->>>>>>> origin/master
+
 
 using namespace std;
 
@@ -80,19 +74,13 @@ void DisplayLight(model);
 
 void Keyboard(unsigned char, int, int);
 void Arrows(int, int, int);
+
 void Up();
 void Down();
-<<<<<<< HEAD
-//void Left();
-//void Right();
 void rightCycle();
 void leftCycle();
 void crash(const char*, float);
-=======
-void Left();
-void Right();
-void crash(const char*, float);
+
 
 void Track(int x, int y, int z);
 static void torus(float inner, float outer, unsigned int pts);
->>>>>>> origin/master
