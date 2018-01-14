@@ -14,8 +14,8 @@ bool firstTime = false;
 bool crashFlag = false;
 
 float R = 25;
-float C1x = 100;
-float C2x = -100;
+float C1x = 75;
+float C2x = -75;
 float Cz = -110;
 float origRot = 180;
 float origTx;
@@ -26,7 +26,7 @@ float time = 0;
 
 float tx = 0.0;
 float tz = Cz+R;
-float acc = 2.5;
+float acc = 3;
 float rotx = 270.0;
 float roty = 180;
 
@@ -70,7 +70,6 @@ void Render()
 
 
 	glPushMatrix();
-	//glTranslatef(0, 0, -250);
 	glTranslatef(tx, 0, tz);
 	glRotatef(roty, 0, 90, 0);
 	glRotatef(rotx, 180, 0, 0); 
@@ -80,77 +79,9 @@ void Render()
 	
 	
 	if (tx >= C1x) {
-		/*
-		if (firstTime < 0) {
-			firstTime = 1;
-			origTx = C1x;
-			origTz = Cz-R;
-			origRot = 180;
-		}
-		else {
-			firstTime += 1;
-		}
-		float omega = acc / R;
-		float theta = omega * firstTime;
-		
-		tx = origTx + (R * sin(theta*PI / 180));
-
-		if (rightFlag) {
-			tz = origTz - R * cos((270+theta)*PI / 180);
-			cout << "hi\n";
-			//tx = origTx + (R * sin(theta*PI / 180));
-			//tz = origTz - acc * sin(theta*PI / 180);
-		}
-		if (leftFlag) {
-			cout << "hi2\n";
-		//	tx = origTx + (R * sin(theta*PI / 180));
-			tz = origTz - (R - R * cos((270 + theta)*PI / 180));
-		}
-
-		roty = origRot + theta;
-
-		if (!leftFlag && tz <= Cz) {
-			cout << "hi3\n";
-			leftFlag = true;
-			rightFlag = false;
-			origTz -= R;
-		}
-		cout << "R\t" << tz << "\t" << theta << "\t" << tz << "\t" << tx << " " << (R * sin(theta*PI / 180)) << endl;
-		*/
 		rightCycle();
 	}
 	else if (tx <= C2x) {
-		/*
-		if (firstTime < 0) {
-			firstTime = 1;
-			origTx = -200;
-			origTz = -270;
-			origRot = 0;
-		}
-		else {
-			firstTime += 1;
-		}
-		float omega = acc / R;
-		float theta = omega * firstTime;
-
-		tx = origTx - (R * sin(theta*PI / 180));
-
-		if (leftFlag) {
-			tz = origTz + R * cos((270 + theta)*PI / 180);
-		}
-		if (rightFlag) {
-			tz = origTz + (R - R * cos(theta*PI / 180));
-		}
-		
-		if (!rightFlag && tz >= -260) {
-			rightFlag = true;
-			leftFlag = false;
-			origTz += R;
-		}
-
-		roty = origRot + theta;
-		cout << "L\t" << tz << "\t" << theta << endl;
-		*/
 		leftCycle();
 	}
 	else{
@@ -159,31 +90,19 @@ void Render()
 		}
 		if (rightFlag) {
 			tx += acc;//*time;
-			cout << "A" << endl;
 			if (tx > C1x) {
 				rightCycle();
 			}
-			cout << tx << endl;
 		}
 		if (leftFlag) {
 			tx -= acc;//*time;
-			cout << "B" << endl;
 			if (tx < C2x) {
 				leftCycle();
 			}
-			cout << tx << endl;
 
 		}
 	}
 	glPopMatrix();
-
-
-	/*
-	glPushMatrix();
-
-	glPopMatrix();
-	*/
-
 
 
 	torus(50, 20, 30);
@@ -230,59 +149,7 @@ void Render()
 
 
 	if (crashFlag) {
-		//CRASH
-		//-7.04769, -2.56515			Es
-		//-15.0, 0						0b
-		//-7.04769, 2.56515				Ds
-		//-11265462, 10.26056			Ab
-		//-3.75, 6.49519				Cs
-		//-2.604722, 14.772116			Bb
-		//1.30236, 7.38606				Bs
-		//7.5, 12.990381				Cb
-		//5.74533, 4.82091				As
-		//14.095389, 5.459553			Db
-		//7.5, 0						0s
-		//14.095389, -5.459553			Eb
-		//5.74533, -4.82091				Hs
-		//7.5, -12.990381				Fb
-		//1.30236, -7.38606				Gs
-		//-2.604722, -14.772116			Gb
-		//-3.75, -6.49519				Fs
-		//-11265462, -10.26056			Hb
-
-		//glPushMatrix();
-		
-		/*
-		glPushMatrix();
-		glTranslatef(0, 25, -75);
-		glPointSize(5);
-		glBegin(GL_POLYGON);
-
-
-
-		glColor3f(1.0, 0.0, 0.0);
-		glVertex2f(-7.04769, -2.56515);
-		glVertex2f(-15.0, 0);
-		glVertex2f(-7.04769, 2.56515);
-		glVertex2f(-11.265462, 10.26056);
-		glVertex2f(-3.75, 6.49519);
-		glVertex2f(-2.604722, 14.772116);
-		glVertex2f(1.30236, 7.38606);
-		glVertex2f(7.5, 12.990381);
-		glVertex2f(5.74533, 4.82091);
-		glVertex2f(14.095389, 5.459553);
-		glVertex2f(7.5, 0);
-		glVertex2f(14.095389, -5.459553);
-		glVertex2f(5.74533, -4.82091);
-		glVertex2f(7.5, -12.990381);
-		glVertex2f(1.30236, -7.38606);
-		glVertex2f(-2.604722, -14.772116);
-		glVertex2f(-3.75, -6.49519);
-		glVertex2f(-11.265462, -10.26056);
-
-		glEnd();*/
 		crash("CRASH!", 0.05f);
-		//glPopMatrix();
 	}
 	
 
@@ -483,18 +350,6 @@ void ReadFileLight(model *traffic_light) {
 			string item;
 			istringstream s(input.substr(2));
 			
-			/*
-			s >> temp_face.vtx[0];
-			s >> temp_face.vn[0];
-			cout << temp_face.vtx[0] << '\t' << temp_face.vn[0];
-			s >> temp_face.vtx[1];
-			s >> temp_face.vn[1];
-			cout << temp_face.vtx[1] << '\t' << temp_face.vn[1];
-			s >> temp_face.vtx[2];
-			s >> temp_face.vn[2];
-			cout << temp_face.vtx[2] << '\t' << temp_face.vn[2] << endl;
-			*/
-			
 			while (getline(s, token, ' ')) {
 				int pos = token.find('/');
 				istringstream (token.substr(0, pos)) >> temp_face.vtx[i];
@@ -615,14 +470,6 @@ void Keyboard(unsigned char key, int x, int y)
 	case 'S':
 		Down();
 		break;
-	case 'a':
-	case 'A':
-		//Left();
-		break;
-	case 'd':
-	case 'D':
-		//Right();
-		break;
 	case 'f':
 	case 'F':
 		fullscreen = !fullscreen;
@@ -706,7 +553,6 @@ void rightCycle() {
 		origTz = Cz+R;
 		origRot = 180;
 		if (tx > origTx) {
-			//theta = ((tx - origTx) * 360) / (2 * PI*R);
 			theta = (tx - origTx) / R;
 		}
 		else{
@@ -719,46 +565,21 @@ void rightCycle() {
 		theta += omega;
 	}
 
-	//tx = origTx + (R * sin(theta*PI / 180));
 	tx = origTx + (R * sin(theta));
 
-	
-	/*
-	if (rightFlag) {
-		tz = origTz - R * cos((270 + theta)*PI / 180);
-		cout << "hi\n";
-		//tx = origTx + (R * sin(theta*PI / 180));
-		//tz = origTz - acc * sin(theta*PI / 180);
-	}
-	if (leftFlag) {
-		cout << "hi2\n";
-		//	tx = origTx + (R * sin(theta*PI / 180));
-		tz = origTz - (R - R * cos((270 + theta)*PI / 180));
-	}
-	*/
-	//if (!leftFlag && theta>90) {
 	if (!leftFlag && theta>PI/2) {
-		cout << "hi3\n";
 		leftFlag = true;
 		rightFlag = false;
 		origTz = Cz;
 	}
 
-	//if (theta <= 90) {
 	if (theta <= PI/2) {
 		tz = origTz - R * cos(3*PI/2 + theta);
-		cout << "hi\n";
-		//tx = origTx + (R * sin(theta*PI / 180));
-		//tz = origTz - acc * sin(theta*PI / 180);
 	}
 	else{
-		cout << "hi2\n";
-		//	tx = origTx + (R * sin(theta*PI / 180));
-		//tz = origTz - (R - R * cos((270 + theta)*PI / 180));
 		tz = origTz - (R - R * cos(3*PI/2 + theta));
 	}
 
-	//roty = origRot + theta;
 	roty = origRot + theta*180/PI;
 
 	if (roty > 360) {
@@ -767,7 +588,6 @@ void rightCycle() {
 		roty = 0;
 	}
 
-	cout << "R\t" << theta << "\t" << roty << "\t" << tz << "\t" << tx << endl;
 }
 
 
@@ -778,7 +598,6 @@ void leftCycle() {
 		origTz = Cz-R;
 		origRot = 0;
 		if (tx < origTx) {
-			//theta = ((origTx - tx) * 360) / (2 * PI*R);
 			theta = (origTx - tx)/R;
 		}
 		else {
@@ -791,25 +610,13 @@ void leftCycle() {
 		theta += omega;
 	}
 
-	//if (!rightFlag && theta > 90) {
 	if (!rightFlag && theta > PI/2) {
 		rightFlag = true;
 		leftFlag = false;
-		cout << "DID IT !!!\n";
 		origTz = Cz;
 	}
 
-	//tx = origTx - (R * sin(theta*PI / 180));
 	tx = origTx - (R * sin(theta));
-
-	/*
-	if (theta <= 90) {
-		tz = origTz + R * cos((270 + theta)*PI / 180);
-	}
-	else {
-		tz = origTz + (R - R * cos((270 + theta)*PI / 180));
-	}
-	*/
 
 	if (theta <= PI/2) {
 		tz = origTz + R * cos(3*PI/2 + theta);
@@ -817,10 +624,6 @@ void leftCycle() {
 	else {
 		tz = origTz + (R - R * cos(3*PI/2 + theta));
 	}
-
-	
-
-	//roty = origRot + theta;
 	
 	roty = origRot + theta*180/PI;
 
@@ -829,7 +632,6 @@ void leftCycle() {
 		tz = Cz + R;
 		roty = 180;
 	}
-	cout << "L\t" << theta << "\t" << Cz << "\t" << tz << "\t" << tx << endl;
 }
 
 
