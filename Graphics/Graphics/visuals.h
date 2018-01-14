@@ -10,12 +10,7 @@
 
 #include "gl/glut.h"   // - An interface and windows management library
 
-#define THRESH1 5
-#define THRESH2 15
-#define THRESH3 35
-#define THRESH4 70
-#define THRESH5 120
-
+#define PI 3.14159265
 
 using namespace std;
 
@@ -78,6 +73,8 @@ void Keyboard(unsigned char, int, int);
 void Arrows(int, int, int);
 void Up();
 void Down();
-void Left();
-void Right();
+//void Left();
+//void Right();
+void rightCycle();
+void leftCycle();
 void crash(const char*, float);

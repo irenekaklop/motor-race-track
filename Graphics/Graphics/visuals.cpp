@@ -3,15 +3,40 @@
 
 model car;
 model light;
+
 bool fullscreen = false;
-static float tx = 0.0;
-float acc = 0.5;
-float dec = -0.5;
-float speeds = 1;
-static float rotx = 270.0;
-static float rotz = 180;
-static bool animate = false;
+
+bool leftFlag = false;
+bool rightFlag = true;
+bool firstTime = false;
+
 bool crashFlag = false;
+
+float R = 25;
+float C1x = 100;
+float C2x = -100;
+float Cz = -110;
+float origRot = 180;
+float origTx;
+float origTz;
+float omega;
+float theta;
+float time = 0;
+
+float tx = 0.0;
+float tz = Cz+R;
+float acc = 2.5;
+float rotx = 270.0;
+float roty = 180;
+
+
+
+// angle of rotation for the camera direction
+float angle = 0.0;
+// actual vector representing the camera's direction
+float lx = 0.0f, lz = -1.0f;
+// XZ position of the camera
+float x = 0.0f, z = 5.0f;
 
 
 using namespace std;
@@ -24,30 +49,152 @@ void Render()
 														 // and the depth buffer
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	/*
+	
+	
+	gluLookAt(x, 1.0f, z, x + lx, 1.0f, z + lz, 0.0f, 1.0f, 0.0f);
+
+
+
 	glPushMatrix();
-	glTranslatef(0, 0, -250);
-	glTranslatef(tx, -80, 0.0);
-	glRotatef(rotz, 0, 90, 0);
+	//glTranslatef(0, 0, -250);
+	glTranslatef(tx, 0, tz);
+	glRotatef(roty, 0, 90, 0);
 	glRotatef(rotx, 180, 0, 0); 
-	glScalef(0.25f, 0.25f, 0.25f);
+	glScalef(0.05f, 0.05f, 0.05f);
 	glColor3f(1.0, 1.0, 1.0);                            // Set drawing colour
 	DisplayCar(car);
+	
+	
+	if (tx >= C1x) {
+		/*
+		if (firstTime < 0) {
+			firstTime = 1;
+			origTx = C1x;
+			origTz = Cz-R;
+			origRot = 180;
+		}
+		else {
+			firstTime += 1;
+		}
+		float omega = acc / R;
+		float theta = omega * firstTime;
+		
+		tx = origTx + (R * sin(theta*PI / 180));
+
+		if (rightFlag) {
+			tz = origTz - R * cos((270+theta)*PI / 180);
+			cout << "hi\n";
+			//tx = origTx + (R * sin(theta*PI / 180));
+			//tz = origTz - acc * sin(theta*PI / 180);
+		}
+		if (leftFlag) {
+			cout << "hi2\n";
+		//	tx = origTx + (R * sin(theta*PI / 180));
+			tz = origTz - (R - R * cos((270 + theta)*PI / 180));
+		}
+
+		roty = origRot + theta;
+
+		if (!leftFlag && tz <= Cz) {
+			cout << "hi3\n";
+			leftFlag = true;
+			rightFlag = false;
+			origTz -= R;
+		}
+		cout << "R\t" << tz << "\t" << theta << "\t" << tz << "\t" << tx << " " << (R * sin(theta*PI / 180)) << endl;
+		*/
+		rightCycle();
+	}
+	else if (tx <= C2x) {
+		/*
+		if (firstTime < 0) {
+			firstTime = 1;
+			origTx = -200;
+			origTz = -270;
+			origRot = 0;
+		}
+		else {
+			firstTime += 1;
+		}
+		float omega = acc / R;
+		float theta = omega * firstTime;
+
+		tx = origTx - (R * sin(theta*PI / 180));
+
+		if (leftFlag) {
+			tz = origTz + R * cos((270 + theta)*PI / 180);
+		}
+		if (rightFlag) {
+			tz = origTz + (R - R * cos(theta*PI / 180));
+		}
+		
+		if (!rightFlag && tz >= -260) {
+			rightFlag = true;
+			leftFlag = false;
+			origTz += R;
+		}
+
+		roty = origRot + theta;
+		cout << "L\t" << tz << "\t" << theta << endl;
+		*/
+		leftCycle();
+	}
+	else{
+		if (firstTime) {
+			firstTime = false;
+		}
+		if (rightFlag) {
+			tx += acc;//*time;
+			cout << "A" << endl;
+			if (tx > C1x) {
+				rightCycle();
+			}
+			cout << tx << endl;
+		}
+		if (leftFlag) {
+			tx -= acc;//*time;
+			cout << "B" << endl;
+			if (tx < C2x) {
+				leftCycle();
+			}
+			cout << tx << endl;
+
+		}
+	}
+	glPopMatrix();
+
+	//time += 1;
+
+	/*
+	glPushMatrix();
+	glTranslatef(0, 0, -100);
+	//glRotatef(45, 0, 1, 0);
+	//glRotatef(rotx, 180, 0, 0);
+	//glScalef(0.25f, 0.25f, 0.25f);
+	glColor3f(0.749020, 0.749020, 0.749020);                            // Set drawing colour
+	DisplayLight(light);
 	glPopMatrix();
 	*/
 	
 	glPushMatrix();
-	glTranslatef(0, 0, -100);
-	glTranslatef(tx, 0, 0.0);
-	//glRotatef(45, 0, 1, 0);
-	//glRotatef(rotx, 180, 0, 0);
-	//glScalef(0.25f, 0.25f, 0.25f);
-	glColor3f(1.0, 1.0, 1.0);                            // Set drawing colour
-	DisplayLight(light);
+	glTranslatef(0, 0, 0);
+	glColor3f(0.0, 1.0, 1.0);
+	glPointSize(5);
+	glBegin(GL_POINTS);
+	glVertex3f(C1x, 0, Cz);
+	glEnd();
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(0, 0, 0);
+	glColor3f(0.0, 1.0, 1.0);
+	glPointSize(5);
+	glBegin(GL_POINTS);
+	glVertex3f(C2x, 0, Cz);
+	glEnd();
 	glPopMatrix();
 	
 
-	glPushMatrix();
 	if (crashFlag) {
 		//CRASH
 		//-7.04769, -2.56515			Es
@@ -70,6 +217,9 @@ void Render()
 		//-11265462, -10.26056			Hb
 
 		//glPushMatrix();
+		
+		/*
+		glPushMatrix();
 		glTranslatef(0, 25, -75);
 		glPointSize(5);
 		glBegin(GL_POLYGON);
@@ -96,10 +246,11 @@ void Render()
 		glVertex2f(-3.75, -6.49519);
 		glVertex2f(-11.265462, -10.26056);
 
-		glEnd();
+		glEnd();*/
 		crash("CRASH!", 0.05f);
+		//glPopMatrix();
 	}
-	glPopMatrix();
+
 	
 
 	glutSwapBuffers();             // All drawing commands applied to the 
@@ -127,9 +278,6 @@ void Resize(int w, int h)
 
 void Idle()
 {
-	if (animate)
-		rotx += 0.4;
-
 	glutPostRedisplay();
 }
 
@@ -171,10 +319,9 @@ void Setup()  // TOUCH IT !!
 
 	
 
-
 	// Black background
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
+	
 }
 
 
@@ -343,6 +490,18 @@ void DisplayLight(model md) {
 
 
 	for (vector<face>::iterator it = md.faces.begin(); it != md.faces.end(); it++) {
+		/*
+		glVertex3f(md.vertices.at(it->vtx[0] - 1).x + md.normals.at(it->vn[0] - 1).x*5.0,
+				   md.vertices.at(it->vtx[0] - 1).y + md.normals.at(it->vn[0] - 1).y*5.0,
+				   md.vertices.at(it->vtx[0] - 1).z + md.normals.at(it->vn[0] - 1).z*5.0);
+		glVertex3f(md.vertices.at(it->vtx[1] - 1).x + md.normals.at(it->vn[1] - 1).x*5.0,
+				   md.vertices.at(it->vtx[1] - 1).y + md.normals.at(it->vn[1] - 1).y*5.0,
+				   md.vertices.at(it->vtx[1] - 1).z + md.normals.at(it->vn[1] - 1).z*5.0);
+		glVertex3f(md.vertices.at(it->vtx[2] - 1).x + md.normals.at(it->vn[2] - 1).x*5.0,
+				   md.vertices.at(it->vtx[2] - 1).y + md.normals.at(it->vn[2] - 1).y*5.0,
+				   md.vertices.at(it->vtx[2] - 1).z + md.normals.at(it->vn[2] - 1).z*5.0);
+		*/
+		
 		glVertex3f(md.vertices.at(it->vtx[0] - 1).x, md.vertices.at(it->vtx[0] - 1).y, md.vertices.at(it->vtx[0] - 1).z);
 		glVertex3f(md.vertices.at(it->vtx[1] - 1).x, md.vertices.at(it->vtx[1] - 1).y, md.vertices.at(it->vtx[1] - 1).z);
 		glVertex3f(md.vertices.at(it->vtx[2] - 1).x, md.vertices.at(it->vtx[2] - 1).y, md.vertices.at(it->vtx[2] - 1).z);
@@ -381,11 +540,11 @@ void Keyboard(unsigned char key, int x, int y)
 		break;
 	case 'a':
 	case 'A':
-		Left();
+		//Left();
 		break;
 	case 'd':
 	case 'D':
-		Right();
+		//Right();
 		break;
 	case 'f':
 	case 'F':
@@ -411,6 +570,7 @@ void Keyboard(unsigned char key, int x, int y)
 
 
 void Arrows(int key, int x, int y) {
+	/*
 	switch (key) {
 	case GLUT_KEY_UP:
 		Up();
@@ -419,37 +579,232 @@ void Arrows(int key, int x, int y) {
 		Down();
 		break;
 	case GLUT_KEY_LEFT:
-		Left();
+		//Left();
 		break;
 	case GLUT_KEY_RIGHT:
-		Right();
+		//Right();
+		break;
+	}
+	*/
+
+	float fraction = 1.0f;
+
+	switch (key) {
+	case GLUT_KEY_LEFT:
+		angle -= 0.01f;
+		lx = sin(angle);
+		lz = -cos(angle);
+		break;
+	case GLUT_KEY_RIGHT:
+		angle += 0.01f;
+		lx = sin(angle);
+		lz = -cos(angle);
+		break;
+	case GLUT_KEY_UP:
+		x += lx * fraction;
+		z += lz * fraction;
+		break;
+	case GLUT_KEY_DOWN:
+		x -= lx * fraction;
+		z -= lz * fraction;
 		break;
 	}
 }
 
 
 void Up() {
-	tx -= acc;
-	acc += 0.5f;
+
+	acc += 0.1;
+	//tx -= acc;
+	//acc += 0.1f;
+	//float alpha = 0.0f;
+	//float start = tx;
+	//float end = tx - acc;
+	//do {
+	//	alpha += 0.025f;
+	//	tx = (1 - alpha)*start + alpha * end;
+	//} while (alpha < 1.0);
 }
 
 
 void Down() {
-	tx += 5.5f;
+	acc -= 0.1f;
 }
 
 
-void Left() {
-	rotz += 5;
+//void Left() {
+//	roty += 5;
+//}
+
+//void Right() {
+//	roty -= 5;
+//}
+
+
+void rightCycle() {
+	if (!firstTime) {
+		firstTime = true;
+		origTx = C1x;
+		origTz = Cz+R;
+		origRot = 180;
+		if (tx > origTx) {
+			//theta = ((tx - origTx) * 360) / (2 * PI*R);
+			theta = (tx - origTx) / R;
+		}
+		else{
+			omega = acc / R;
+			theta = omega;
+		}
+	}
+	else {
+		omega = acc / R;
+		theta += omega;
+	}
+
+	//tx = origTx + (R * sin(theta*PI / 180));
+	tx = origTx + (R * sin(theta));
+
+	
+	/*
+	if (rightFlag) {
+		tz = origTz - R * cos((270 + theta)*PI / 180);
+		cout << "hi\n";
+		//tx = origTx + (R * sin(theta*PI / 180));
+		//tz = origTz - acc * sin(theta*PI / 180);
+	}
+	if (leftFlag) {
+		cout << "hi2\n";
+		//	tx = origTx + (R * sin(theta*PI / 180));
+		tz = origTz - (R - R * cos((270 + theta)*PI / 180));
+	}
+	*/
+	//if (!leftFlag && theta>90) {
+	if (!leftFlag && theta>PI/2) {
+		cout << "hi3\n";
+		leftFlag = true;
+		rightFlag = false;
+		origTz = Cz;
+	}
+
+	//if (theta <= 90) {
+	if (theta <= PI/2) {
+		tz = origTz - R * cos(3*PI/2 + theta);
+		cout << "hi\n";
+		//tx = origTx + (R * sin(theta*PI / 180));
+		//tz = origTz - acc * sin(theta*PI / 180);
+	}
+	else{
+		cout << "hi2\n";
+		//	tx = origTx + (R * sin(theta*PI / 180));
+		//tz = origTz - (R - R * cos((270 + theta)*PI / 180));
+		tz = origTz - (R - R * cos(3*PI/2 + theta));
+	}
+
+	//roty = origRot + theta;
+	roty = origRot + theta*180/PI;
+
+	if (roty > 360) {
+		tx = C1x - ((2 * PI*R*(roty - 360)) / 360);
+		tz = Cz - R;
+		roty = 0;
+	}
+
+	cout << "R\t" << theta << "\t" << roty << "\t" << tz << "\t" << tx << endl;
 }
 
-void Right() {
-	rotz -= 5;
+
+void leftCycle() {
+	if (!firstTime) {
+		firstTime = true;
+		origTx = C2x;
+		origTz = Cz-R;
+		origRot = 0;
+		if (tx < origTx) {
+			//theta = ((origTx - tx) * 360) / (2 * PI*R);
+			theta = (origTx - tx)/R;
+		}
+		else {
+			omega = acc / R;
+			theta = omega;
+		}
+	}
+	else{
+		omega = acc / R;
+		theta += omega;
+	}
+
+	//if (!rightFlag && theta > 90) {
+	if (!rightFlag && theta > PI/2) {
+		rightFlag = true;
+		leftFlag = false;
+		cout << "DID IT !!!\n";
+		origTz = Cz;
+	}
+
+	//tx = origTx - (R * sin(theta*PI / 180));
+	tx = origTx - (R * sin(theta));
+
+	/*
+	if (theta <= 90) {
+		tz = origTz + R * cos((270 + theta)*PI / 180);
+	}
+	else {
+		tz = origTz + (R - R * cos((270 + theta)*PI / 180));
+	}
+	*/
+
+	if (theta <= PI/2) {
+		tz = origTz + R * cos(3*PI/2 + theta);
+	}
+	else {
+		tz = origTz + (R - R * cos(3*PI/2 + theta));
+	}
+
+	
+
+	//roty = origRot + theta;
+	
+	roty = origRot + theta*180/PI;
+
+	if (roty > 180) {
+		tx = C2x + ((2 * PI*R*(roty - 180)) / 360);
+		tz = Cz + R;
+		roty = 180;
+	}
+	cout << "L\t" << theta << "\t" << Cz << "\t" << tz << "\t" << tx << endl;
 }
 
 
 void crash(const char *str, float size)
 {
+	glPushMatrix();
+	glTranslatef(0, 25, -75);
+	glPointSize(5);
+	glBegin(GL_POLYGON);
+
+
+
+	glColor3f(1.0, 0.0, 0.0);
+	glVertex2f(-7.04769, -2.56515);
+	glVertex2f(-15.0, 0);
+	glVertex2f(-7.04769, 2.56515);
+	glVertex2f(-11.265462, 10.26056);
+	glVertex2f(-3.75, 6.49519);
+	glVertex2f(-2.604722, 14.772116);
+	glVertex2f(1.30236, 7.38606);
+	glVertex2f(7.5, 12.990381);
+	glVertex2f(5.74533, 4.82091);
+	glVertex2f(14.095389, 5.459553);
+	glVertex2f(7.5, 0);
+	glVertex2f(14.095389, -5.459553);
+	glVertex2f(5.74533, -4.82091);
+	glVertex2f(7.5, -12.990381);
+	glVertex2f(1.30236, -7.38606);
+	glVertex2f(-2.604722, -14.772116);
+	glVertex2f(-3.75, -6.49519);
+	glVertex2f(-11.265462, -10.26056);
+
+	glEnd();
 
 	glPushMatrix();
 	glTranslatef(-10.5, -2.0, 0.0);
@@ -458,6 +813,8 @@ void crash(const char *str, float size)
 
 	for (int i = 0; i<strlen(str); i++)
 		glutStrokeCharacter(GLUT_STROKE_ROMAN, str[i]);
+	glPopMatrix();
+
 	glPopMatrix();
 
 }
