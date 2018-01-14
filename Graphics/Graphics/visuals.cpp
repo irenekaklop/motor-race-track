@@ -1,4 +1,5 @@
 #include "visuals.h"
+#include <cmath>
 
 
 model car;
@@ -41,6 +42,19 @@ float x = 0.0f, z = 5.0f;
 
 using namespace std;
 
+void axes()
+{
+	glColor3f(0.6, 0.6, 0.6);
+	glPushMatrix();
+	glTranslatef(0, 0, -1.0);
+	glBegin(GL_LINES);
+	glVertex2f(0.0, 0.0);
+	glVertex2f(100.0, 0.0);
+	glVertex2f(0.0, 0.0);
+	glVertex2f(0.0, 100.0);
+	glEnd();
+	glPopMatrix();
+}
 
 void Render()
 {
@@ -63,6 +77,7 @@ void Render()
 	glScalef(0.05f, 0.05f, 0.05f);
 	glColor3f(1.0, 1.0, 1.0);                            // Set drawing colour
 	DisplayCar(car);
+<<<<<<< HEAD
 	
 	
 	if (tx >= C1x) {
@@ -167,6 +182,23 @@ void Render()
 
 	/*
 	glPushMatrix();
+=======
+	glPopMatrix();
+	*/
+
+
+
+	torus(50, 20, 30);
+
+	
+	//Track
+	/*Track(40, -25, 35);
+	Track(30, 20, 30);*/
+
+
+	/*Light*/
+	/*glPushMatrix();
+>>>>>>> origin/master
 	glTranslatef(0, 0, -100);
 	//glRotatef(45, 0, 1, 0);
 	//glRotatef(rotx, 180, 0, 0);
@@ -174,6 +206,7 @@ void Render()
 	glColor3f(0.749020, 0.749020, 0.749020);                            // Set drawing colour
 	DisplayLight(light);
 	glPopMatrix();
+<<<<<<< HEAD
 	*/
 	
 	glPushMatrix();
@@ -194,6 +227,9 @@ void Render()
 	glEnd();
 	glPopMatrix();
 	
+=======
+	glPushMatrix();
+>>>>>>> origin/master
 
 	if (crashFlag) {
 		//CRASH
@@ -250,7 +286,11 @@ void Render()
 		crash("CRASH!", 0.05f);
 		//glPopMatrix();
 	}
+<<<<<<< HEAD
 
+=======
+	glPopMatrix();*/
+>>>>>>> origin/master
 	
 
 	glutSwapBuffers();             // All drawing commands applied to the 
@@ -272,7 +312,9 @@ void Resize(int w, int h)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
-	gluPerspective(60.0, (float)w / (float)h, 1.0, 1000.0);
+	//glOrtho (-50.0f, 50.0f, -50.0f, 50.0f,-1000.0f,1000.0f);
+	float aspect = (float)w / (float)h;
+	gluPerspective(60.0, aspect, 1.0, 1000.0);
 }
 
 
@@ -322,6 +364,48 @@ void Setup()  // TOUCH IT !!
 	// Black background
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	
+}
+
+static void torus(float inner, float outer, unsigned int pts)
+{
+	glPushMatrix();
+	glTranslatef(-30, -40, -200);
+
+	glColor3f(1.0, 0, 0);
+	glRotatef(90, 1.0, 0, 0);
+	glRotatef(90, 0, 0, 1.0);
+
+	glBegin(GL_QUAD_STRIP);
+	
+	for (unsigned int i = 0; i <= pts/2; ++i)
+	{
+		float angle = (i / (float)pts) * 3.14159f * 2.0f;
+		glVertex2f(inner * cos(angle), inner * sin(angle));
+		glVertex2f(outer * cos(angle), outer * sin(angle));
+	}
+	glEnd();
+
+	glPopMatrix();
+
+}
+
+void Track(int x, int y, int z) {
+	/*Track*/
+
+	glPushMatrix();
+	glTranslatef(0, 0, -75);
+	glColor3f(0, 0, 1.0);
+	glPointSize(5);
+	glBegin(GL_POLYGON);
+
+	glVertex3f(-x, y, -z);
+	glVertex3f(x, y, -z);
+	glVertex3f(x, y, z-10);
+	glVertex3f(-x, y, z-10);
+
+	glEnd();
+
+	glPopMatrix();
 }
 
 
