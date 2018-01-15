@@ -39,7 +39,6 @@ void Render()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	
-<<<<<<< HEAD
 	//Set position
 	glTranslatef(0.0, 0.0, -250.0);
 	glRotatef(-50, 1, 0, 0);
@@ -47,8 +46,8 @@ void Render()
 	//Track
 
 	/* UPPER STRAIGHT TRACK
-	(200, 25)(Á)			(D)(-50, 25)
-	(200,-25)(Â)			(C)(-50,-25)
+	(200, 25)(ï¿½)			(D)(-50, 25)
+	(200,-25)(ï¿½)			(C)(-50,-25)
 
 	second part
 	(-200, 25)	(-150, 25)
@@ -167,7 +166,6 @@ void Render()
 	glRotatef(rotz, 0, 90, 0);
 	glRotatef(rotx, 180, 0, 0);
 	glScalef(0.25f, 0.25f, 0.25f);
-=======
 	
 	current = time(NULL);
 
@@ -176,7 +174,6 @@ void Render()
 	glRotatef(userCarM.roty, 0, 90, 0);
 	glRotatef(userCarM.rotx, 180, 0, 0);
 	glScalef(0.01f, 0.01, 0.01);
->>>>>>> 91e7889713d1538e360b9b5720de28b37c364fbb
 	glColor3f(1.0, 1.0, 1.0);                            // Set drawing colour
 	//DisplayCar(userCar);
 	glCallList(userCarId);
@@ -185,8 +182,6 @@ void Render()
 
 	glPopMatrix();
 
-<<<<<<< HEAD
-=======
 
 	glPushMatrix();
 	glTranslatef(compCarM.tx, height, compCarM.tz);
@@ -202,16 +197,7 @@ void Render()
 	glPopMatrix();
 	
 
-	
-	//torus(50, 20, 30);
 
-	
-	//Track
-	/*Track(40, -25, 35);
-	Track(30, 20, 30);*/
-
-
->>>>>>> 91e7889713d1538e360b9b5720de28b37c364fbb
 	/*Light*/
 	glPushMatrix();
 
@@ -327,8 +313,6 @@ void Setup()  // TOUCH IT !!
 	//Parameter handling
 	glShadeModel(GL_SMOOTH);
 
-<<<<<<< HEAD
-=======
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);  //renders a fragment if its z value is less or equal of the stored value
 	glClearDepth(1);
@@ -358,7 +342,6 @@ void Setup()  // TOUCH IT !!
 
 	
 
->>>>>>> 91e7889713d1538e360b9b5720de28b37c364fbb
 	// Black background
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -821,12 +804,11 @@ void crash(const char *str, float size)
 		glutStrokeCharacter(GLUT_STROKE_ROMAN, str[i]);
 	glPopMatrix();
 
-<<<<<<< HEAD
 }
 
 void Gatemove(float Ypos) {
 
-		/*BRIDGE- PINK Ïpen
+		/*BRIDGE- PINK ï¿½pen
 		(-150, 140)	(-50, 25)
 		(-150, 90)	(-50,-25)
 		*/
@@ -839,8 +821,5 @@ void Gatemove(float Ypos) {
 		glVertex2f(-50.0, -25);
 		glVertex2f(-50.0, 25);
 		glEnd();
-=======
-	glPopMatrix();
->>>>>>> 91e7889713d1538e360b9b5720de28b37c364fbb
 
 }
