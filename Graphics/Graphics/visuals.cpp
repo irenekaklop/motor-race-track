@@ -20,12 +20,13 @@ bool redFlag = false;
 bool orangeFlag = false;
 bool greenFlag = true;
 
-float R1 = 12.5;
-float R2 = 7.5;
-float C1x = 12.5;
-float C2x = -12.5;
-float Cz = -50;
+float R1 = 13;
+float R2 = 8;
+float C1x = 15;
+float C2x = -15;
+float Cz = -34;
 float height = -7.5;
+float offset = 2.5;
 
 float acc = 0.1f;
 float v_max = 1.25f;
@@ -33,7 +34,8 @@ float v_max = 1.25f;
 float move_x = 0.0f, move_y = 0.0f;
 float angle = 0;
 
-time_t current, crashTime = -1;
+time_t current, crashTime, redlight_t, greenlight_t, orangelight_t= -1;
+clock_t redlight, current_cl = -1;
 
 using namespace std;
 
@@ -46,9 +48,10 @@ void Render()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	
+	current = time(NULL);
+	current_cl = clock();
+	light_controller();
 	//Set position
-	//glTranslatef(0.0, 0.0, -250.0);
-	//glRotatef(-50, 1, 0, 0);
 
 	//Track
 
@@ -61,20 +64,21 @@ void Render()
 	(-200, -25)	(-150, -25)
 	*/
 
+
 	glColor3f(0.0, 0.0, 1.0);											//make the colour blue (lower)
 	glBegin(GL_QUADS);									
-	glVertex3f(C1x, height, Cz-R2);										
-	glVertex3f(C1x, height, Cz-R1);
-	glVertex3f(-5.0, height, Cz-R1);
-	glVertex3f(-5.0, height, Cz-R2);
+	glVertex3f(C1x, height,	 Cz-R2+offset);										
+	glVertex3f(C1x, height,  Cz-R1-offset);
+	glVertex3f(-5.0, height, Cz-R1-offset);
+	glVertex3f(-5.0, height, Cz-R2+offset);
 	glEnd();
 
 	glColor3f(0.0, 0.0, 1.0);											//make the colour blue (lower)
 	glBegin(GL_QUADS);
-	glVertex3f(-20.0, height, 2.5);
-	glVertex3f(-20.0, height,-2.5);
-	glVertex3f(-5.0, height,-2.5);
-	glVertex3f(-5.0, height, 2.5);
+	glVertex3f(-20.0, height, 2.5-offset);
+	glVertex3f(-20.0, height, -2.5-offset);
+	glVertex3f(-5.0, height, -2.5-offset);
+	glVertex3f(-5.0, height, 2.5-offset);
 	glEnd();
 
 	/* DOWN STRAIGHT TRACK
@@ -83,67 +87,53 @@ void Render()
 	*/
 	glColor3f(0.0, 0.0, 1.0);											//make the colour blue (lower)
 	glBegin(GL_QUADS);
-	glVertex3f(C1x, height, Cz + R2);
-	glVertex3f(C1x, height, Cz + R1);
-	glVertex3f(C2x, height, Cz + R1);
-	glVertex3f(C2x, height, Cz + R2);
+	glVertex3f(C1x, height, Cz + R2 - offset);
+	glVertex3f(C1x, height, Cz + R1 + offset);
+	glVertex3f(C2x, height, Cz + R1 + offset);
+	glVertex3f(C2x, height, Cz + R2 - offset);
 	glEnd();
 
-	/*WHITE BOXES at down straight track
-	(-150, -87.5)	(-140, -87.5) 
-	(-150, -93.75)	(-140, -93.75)
+	/*WHITE BOXES at down straight track*/
 
-	(-150, -100)	(-140, -100)
-	(-150, -106.25)	(-140, -106.25)
-
-	(-150, -112.5)	(-140, -112.5)
-	(-150, -118.75)	(-140, -118.75)
-
-	*/
-
-	/*glColor3f(1.0, 1.0, 1.0);
+	glColor3f(1.0, 1.0, 1.0);
 	glBegin(GL_POLYGON);
-	glVertex2f(-150.0, -87.5);
-	glVertex2f(-150.0, -93.75);
-	glVertex2f(-140.0, -93.75);
-	glVertex2f(-140.0, -87.5);
+	glVertex3f(-5.0, height, Cz+R1+offset-1);
+	glVertex3f(-5.0, height, Cz + R1 + offset - 2);
+	glVertex3f(-6.0, height, Cz + R1 + offset - 2);
+	glVertex3f(-6.0, height, Cz + R1 + offset - 1);
 	glEnd();
 
 	glColor3f(1.0, 1.0, 1.0);
 	glBegin(GL_POLYGON);
-	glVertex2f(-150.0, -100);
-	glVertex2f(-150.0, -106.25);
-	glVertex2f(-140.0, -106.25);
-	glVertex2f(-140.0, -100);
+	glVertex3f(-5.0, height, Cz + R1 + offset - 3);
+	glVertex3f(-5.0, height, Cz + R1 + offset - 4);
+	glVertex3f(-6.0, height, Cz + R1 + offset - 4);
+	glVertex3f(-6.0, height, Cz + R1 + offset - 3);
 	glEnd();
 
 	glColor3f(1.0, 1.0, 1.0);
 	glBegin(GL_POLYGON);
-	glVertex2f(-150.0, -112.5);
-	glVertex2f(-150.0, -118.75);
-	glVertex2f(-140.0, -118.75);
-	glVertex2f(-140.0, -112.5);
-	glEnd();*/
-
-	/*BRIDGE- PINK Closed
-	*/
-	glLoadIdentity();
-	glColor3f(1.0, 0.24, 0.75);
-	//glRotatef(90, 0, 0, 90);
-	glBegin(GL_POLYGON);
-
-	glVertex3f(-5.0, height, Cz - R2);
-	glVertex3f(-5.0, height, Cz - R1);
-
-	glVertex3f(C2x+move_x, height+move_y, Cz - R1);
-	glVertex3f(C2x+move_x, height+ move_y, Cz - R2);
+	glVertex3f(-5.0, height, Cz + R1 + offset - 5);
+	glVertex3f(-5.0, height, Cz + R1 + offset - 6);
+	glVertex3f(-6.0, height, Cz + R1 + offset - 6);
+	glVertex3f(-6.0, height, Cz + R1 + offset - 5);
 	glEnd();
 
-	if (redFlag) {
-		Gatemove(1);
-	}
+	glColor3f(1.0, 1.0, 1.0);
+	glBegin(GL_POLYGON);
+	glVertex3f(-5.0, height, Cz + R1 + offset - 7);
+	glVertex3f(-5.0, height, Cz + R1 + offset - 8);
+	glVertex3f(-6.0, height, Cz + R1 + offset - 8);
+	glVertex3f(-6.0, height, Cz + R1 + offset - 7);
+	glEnd();
 
-
+	glColor3f(1.0, 1.0, 1.0);
+	glBegin(GL_POLYGON);
+	glVertex3f(-5.0, height, Cz + R1 + offset - 9);
+	glVertex3f(-5.0, height, Cz + R1 + offset - 10);
+	glVertex3f(-6.0, height, Cz + R1 + offset - 10);
+	glVertex3f(-6.0, height, Cz + R1 + offset - 9);
+	glEnd();
 	//Semi circle right
 	glPushMatrix();
 	glColor3f(0.0, 0.0, 1.0);
@@ -153,7 +143,7 @@ void Render()
 	glRotatef(90, 90, 0, 0);
 	GLUquadric* quad;
 	quad = gluNewQuadric();
-	gluPartialDisk(quad, R2, R1, 100.0, 3, 0.0, 180.0);
+	gluPartialDisk(quad, R2 - offset, R1 + offset, 100.0, 3, 0.0, 180.0);
 	glPopMatrix();
 
 	//Semi circle left
@@ -165,22 +155,37 @@ void Render()
 	glRotatef(90, 90, 0, 0);
 
 	glColor3f(0.0, 0.0, 1.0);
-	gluPartialDisk(quad, R2, R1, 100.0, 3, 0.0, 180.0);
+	gluPartialDisk(quad, R2 - offset, R1 + offset, 100.0, 3, 0.0, 180.0);
 
 	glPopMatrix();
 
+	/*BRIDGE- PINK Closed
+	*/
+	glLoadIdentity();
+	glColor3f(1.0, 0.24, 0.75);
+	glBegin(GL_POLYGON);
+	glVertex3f(-5.0, height, Cz - R2 + offset);
+	glVertex3f(-5.0, height, Cz - R1 - offset);
+	glVertex3f(C2x + move_x, height + move_y, Cz - R1 - offset);
+	glVertex3f(C2x + move_x, height + move_y, Cz - R2 + offset);
+	glEnd();
+
+	if (redFlag) {
+		Gatemove(redlight);
+	}
+
+
 	glLoadIdentity();
 
-	current = time(NULL);
-
 	glPushMatrix();
-
 	glTranslatef(userCarM.tx, height, userCarM.tz);
+	//glColor3f(1.0, 1.0, 1.0);                            // Set drawing colour
 	glRotatef(userCarM.roty, 0, 90, 0);
 	glRotatef(userCarM.rotx, 180, 0, 0);
-	glScalef(0.01f, 0.01, 0.01);
+	glScalef(0.01f, 0.01f, 0.01f);
 	glColor3f(1.0, 1.0, 1.0);                            // Set drawing colour
 	//DisplayCar(userCar);
+
 	glCallList(userCarId);
 	
 	RenderUserCar();
@@ -189,12 +194,11 @@ void Render()
 
 
 	glPushMatrix();
-
 	glTranslatef(compCarM.tx, height, compCarM.tz);
 	glRotatef(compCarM.roty, 0, 90, 0);
 	glRotatef(compCarM.rotx, 180, 0, 0);
 	glScalef(0.01f, 0.01f, 0.01f);
-	glColor3f(1.0, 1.0, 1.0);                            // Set drawing colour
+	glColor3f(1.0, 0.6, 0.2);                            // Set drawing colour
 	//DisplayCar(compCar);
 	glCallList(compCarId);
 
@@ -206,11 +210,10 @@ void Render()
 
 	/*Light*/
 	glLoadIdentity();
-	//glRotatef(rotx, 180, 0, 0);
-	glTranslatef(-15, 0, -250);
-	//glScalef(0.25f, 0.25f, 0.25f);
+	glTranslatef(-3, height, Cz-R1-offset-2);
+	glRotatef(60, 0, 60, 0);
+	glScalef(0.25f, 0.25f, 0.25f);
 	glColor3f(0.749020, 0.749020, 0.749020);                            // Set drawing colour
-	//DisplayLight(light);
 	glCallList(lightId);
 
 
@@ -245,7 +248,7 @@ void Render()
 			compCarM.leftFlag = false;
 			compCarM.rightFlag = true;
 			compCarM.firstTime = false;
-			compCarM.tx = 0.0;
+			compCarM.tx = -10.0;
 			compCarM.tz = Cz + R2;
 			compCarM.rotx = 270.0;
 			compCarM.roty = 180;
@@ -254,7 +257,7 @@ void Render()
 			userCarM.leftFlag = false;
 			userCarM.rightFlag = true;
 			userCarM.firstTime = false;
-			userCarM.tx = 0.0;
+			userCarM.tx = -10.0;
 			userCarM.tz = Cz + R1;
 			userCarM.rotx = 270.0;
 			userCarM.roty = 180;
@@ -316,6 +319,29 @@ void Setup()  // TOUCH IT !!
 	//Parameter handling
 	glShadeModel(GL_SMOOTH);
 
+	glEnable(GL_COLOR_MATERIAL);
+	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+
+	//Set up light source
+	//SUN
+	GLfloat light_position[] = { 0.0, 30.0, 50.0, 0.0 };
+	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+
+	GLfloat ambientLight[] = { 0.3, 0.3, 0.3, 1.0 };
+	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
+
+	//Set up light source
+	//glTranslatef(-3, height, Cz-R1-offset-2);
+	GLfloat green_light_position[] = { -3, height, Cz - R1 - offset, 1.0 };
+	glLightfv(GL_LIGHT1, GL_POSITION, green_light_position);
+
+	GLfloat specularLight[] = { 0.0, 1.0, 0.0, 1.0 };
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, specularLight);
+
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHT1);
+
 	// Black background
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -323,7 +349,7 @@ void Setup()  // TOUCH IT !!
 	compCarM.leftFlag = false;
 	compCarM.rightFlag = true;
 	compCarM.firstTime = false;
-	compCarM.tx = 0.0;
+	compCarM.tx = -10.0;
 	compCarM.tz = Cz + R2;
 	compCarM.acc = 0.25;
 	compCarM.rotx = 270.0;
@@ -333,7 +359,7 @@ void Setup()  // TOUCH IT !!
 	userCarM.leftFlag = false;
 	userCarM.rightFlag = true;
 	userCarM.firstTime = false;
-	userCarM.tx = 0.0;
+	userCarM.tx = -10.0;
 	userCarM.tz = Cz + R1;
 	userCarM.acc = 0.25;
 	userCarM.rotx = 270.0;
@@ -785,26 +811,70 @@ void crash(const char *str, float size)
 
 }
 
-void Gatemove(float Ypos) {
+void Gatemove(time_t time) {
 
-	/*BRIDGE- PINK open
-	(-150, 140)	(-50, 25)
-	(-150, 90)	(-50,-25)
-	*/
-	/*
-	glColor3f(1.0, 0.24, 0.75);
-	glBegin(GL_POLYGON);
-	int a = Cz - R1;
-	glVertex3f(C2x, height, Cz - R1);
-	glVertex3f(C2x, height, Cz - R2);
-	glVertex3f(-5.0, height, Cz - R2);
-	glVertex3f(-5.0, height, Cz - R1);
-	glEnd();
-	*/
+	double diffticks = current_cl - redlight;
+	double diffms = (diffticks) / (CLOCKS_PER_SEC / 1000);
 
-	angle += 0.1f;
+	cout << diffms << endl;
 
-	move_x = 35 - 35*cos(angle);
-	move_y = 35*sin(angle);
+	if (redFlag && diffms <= 2000 ) { //bridge opens
+		float perc = diffms / 2000;
+		angle = perc * (PI / 6);
+		move_x = 7.5 - 7.5 * cos(angle);
+		move_y = 7.5 * sin(angle);
+	}
+	
+	if (redFlag && diffms >= 4000) {
+		redFlag = false;
+		greenFlag = true;
+		move_x = 0;
+		move_y = 0;
+		diffms = 0;
+		redlight = -1;
+		greenlight_t = -1;
+		redlight_t = -1;
+	}
 
+	if (redFlag && diffms > 2000 && diffms < 4000) { //bridge closes
+		float perc = (2000+(2000-diffms)) / 2000;
+		angle = perc * (PI / 6);
+		move_x = 7.5 - 7.5 * cos(angle);
+		move_y = 7.5 * sin(angle);
+	}
+
+}
+
+void light_controller() {
+	if (greenFlag) {
+		if (greenlight_t == -1) {
+			greenlight_t = current;
+		}
+		if (difftime(current, greenlight_t) >= 5) {
+			greenFlag = false;
+			orangeFlag = true;
+			greenlight_t = -1;
+			orangelight_t = -1;
+		}
+		cout << "green" << endl;
+	}
+	if (orangeFlag) {
+		if (orangelight_t == -1) {
+			orangelight_t = current;
+		}
+		if (difftime(current, orangelight_t) >= 2) {
+			orangeFlag = false;
+			redFlag = true;
+			redlight_t = -1;
+			orangelight_t = -1;
+		}
+		cout << "orange" << endl;
+	}
+	if (redFlag) {
+		if (redlight_t == -1) {
+			redlight = current_cl;
+			redlight_t = current;
+		}
+		cout << "Red" << endl;
+	}
 }
