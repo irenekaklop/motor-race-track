@@ -38,27 +38,138 @@ void Render()
 														 // and the depth buffer
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+	
+	//Set position
+	glTranslatef(0.0, 0.0, -250.0);
+	glRotatef(-50, 1, 0, 0);
+
+	//Track
+
+	/* UPPER STRAIGHT TRACK
+	(200, 25)(Á)			(D)(-50, 25)
+	(200,-25)(Â)			(C)(-50,-25)
+
+	second part
+	(-200, 25)	(-150, 25)
+	(-200, -25)	(-150, -25)
+	*/
+	glColor3f(0.0, 0.0, 1.0);											//make the colour blue (lower)
+	glBegin(GL_QUADS);									
+	glVertex2f(200.0, 25.0);										
+	glVertex2f(200.0, -25.0);	
+	glVertex2f(-50.0, -25.0);
+	glVertex2f(-50.0, 25.0);
+	glEnd();
+
+	glColor3f(0.0, 0.0, 1.0);											//make the colour blue (lower)
+	glBegin(GL_QUADS);
+	glVertex2f(-200.0, 25.0);
+	glVertex2f(-200.0, -25.0);
+	glVertex2f(-150.0, -25.0);
+	glVertex2f(-150.0, 25.0);
+	glEnd();
+
+	/* DOWN STRAIGHT TRACK
+	(-200, -75)(A)	 (D)(200, -75)
+	(-200, -125)(B)	 (C)(200, -125)
+	*/
+	glColor3f(0.0, 0.0, 1.0);											//make the colour blue (lower)
+	glBegin(GL_QUADS);
+	glVertex2f(-200.0, -75.0);
+	glVertex2f(-200.0, -125.0);
+	glVertex2f(200.0, -125.0);
+	glVertex2f(200.0, -75.0);
+	glEnd();
+
+	/*WHITE BOXES at down straight track
+	(-150, -87.5)	(-140, -87.5) 
+	(-150, -93.75)	(-140, -93.75)
+
+	(-150, -100)	(-140, -100)
+	(-150, -106.25)	(-140, -106.25)
+
+	(-150, -112.5)	(-140, -112.5)
+	(-150, -118.75)	(-140, -118.75)
+
+	*/
+
+	glColor3f(1.0, 1.0, 1.0);
+	glBegin(GL_POLYGON);
+	glVertex2f(-150.0, -87.5);
+	glVertex2f(-150.0, -93.75);
+	glVertex2f(-140.0, -93.75);
+	glVertex2f(-140.0, -87.5);
+	glEnd();
+
+	glColor3f(1.0, 1.0, 1.0);
+	glBegin(GL_POLYGON);
+	glVertex2f(-150.0, -100);
+	glVertex2f(-150.0, -106.25);
+	glVertex2f(-140.0, -106.25);
+	glVertex2f(-140.0, -100);
+	glEnd();
+
+	glColor3f(1.0, 1.0, 1.0);
+	glBegin(GL_POLYGON);
+	glVertex2f(-150.0, -112.5);
+	glVertex2f(-150.0, -118.75);
+	glVertex2f(-140.0, -118.75);
+	glVertex2f(-140.0, -112.5);
+	glEnd();
+
+	/*BRIDGE- PINK Closed
+	(-150, 25)	(-50, 25)
+	(-150,-25)	(-50,-25)
+	*/
+
+	/*glColor3f(1.0, 0.20, 0.80);
+	glBegin(GL_POLYGON);
+	glVertex2f(-150.0, 25);
+	glVertex2f(-150.0, -25);
+	glVertex2f(-50.0, -25);
+	glVertex2f(-50.0, 25);
+	glEnd();*/
+
+	int i = 0;
+	for (i = 0; i < 30; i++) {
+		Gatemove(10);
+	}
+
+
+	//Semi circle right
+	glColor3f(0.0, 0.0, 1.0);
+	glLoadIdentity();
+	glTranslatef(0.0, 0.0, -250.0);
+	glRotatef(-50, 1, 0, 0);
+
+	glTranslatef(200.0, -50.0, 0.0);
+	GLUquadric* quad;
+	quad = gluNewQuadric();
+	gluPartialDisk(quad, 25.0, 75.0, 100.0, 3, 0.0, 180.0);
+
+	//Semi circle left
+	glLoadIdentity();
+	glTranslatef(0.0, 0.0, -250.0);
+	glRotatef(-50, 1, 0, 0);
+
+	glRotatef(-180.0, 0, 0, 1);
+	glTranslatef(200.0, 50.0, 0.0);
+
+	glColor3f(0.0, 0.0, 1.0);
+	gluPartialDisk(quad, 25.0, 75.0, 100.0, 3, 0.0, 180.0);
+
+
 	/*
 	glPushMatrix();
 	glTranslatef(0, 0, -250);
 	glTranslatef(tx, -80, 0.0);
 	glRotatef(rotz, 0, 90, 0);
-	glRotatef(rotx, 180, 0, 0); 
+	glRotatef(rotx, 180, 0, 0);
 	glScalef(0.25f, 0.25f, 0.25f);
 	glColor3f(1.0, 1.0, 1.0);                            // Set drawing colour
 	DisplayCar(car);
 	glPopMatrix();
 	*/
-
-
-
-	torus(50, 20, 30);
-
-	
-	//Track
-	/*Track(40, -25, 35);
-	Track(30, 20, 30);*/
-
 
 	/*Light*/
 	/*glPushMatrix();
@@ -147,7 +258,7 @@ void Resize(int w, int h)
 
 	//glOrtho (-50.0f, 50.0f, -50.0f, 50.0f,-1000.0f,1000.0f);
 	float aspect = (float)w / (float)h;
-	gluPerspective(60.0, aspect, 1.0, 1000.0);
+	gluPerspective(100.0, aspect, 1.0, 500.0);
 }
 
 
@@ -168,36 +279,6 @@ void Setup()  // TOUCH IT !!
 	//Parameter handling
 	glShadeModel(GL_SMOOTH);
 
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);  //renders a fragment if its z value is less or equal of the stored value
-	glClearDepth(1);
-
-	// polygon rendering mode
-	glEnable(GL_COLOR_MATERIAL);
-	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-
-	//Set up light source
-	GLfloat light_position[] = { 0.0, 30.0, 50.0, 0.0 };
-	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-
-	GLfloat ambientLight[] = { 0.3, 0.3, 0.3, 1.0 };
-	GLfloat diffuseLight[] = { 0.8, 0.8, 0.8, 1.0 };
-	GLfloat specularLight[] = { 1.0, 1.0, 1.0, 1.0 };
-
-
-	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
-
-
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
-	glEnable(GL_POINT_SMOOTH);
-
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-	
-
-
 	// Black background
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -205,14 +286,14 @@ void Setup()  // TOUCH IT !!
 
 static void torus(float inner, float outer, unsigned int pts)
 {
-	glPushMatrix();
-	glTranslatef(-30, -40, -200);
+	glTranslatef(0.0, 0.0, -200.0);
+	glRotatef(-60, 1.0, 0.0, 0.0);
+	glColor3f(0.0, 0.0, 1.0);
+	glTranslatef(150.0, -75.0, 0.0);
 
-	glColor3f(1.0, 0, 0);
-	glRotatef(90, 1.0, 0, 0);
-	glRotatef(90, 0, 0, 1.0);
 
 	glBegin(GL_QUAD_STRIP);
+	glColor3f(1.0, 0, 0);
 	
 	for (unsigned int i = 0; i <= pts/2; ++i)
 	{
@@ -222,30 +303,8 @@ static void torus(float inner, float outer, unsigned int pts)
 	}
 	glEnd();
 
-	glPopMatrix();
 
 }
-
-void Track(int x, int y, int z) {
-	/*Track*/
-
-	glPushMatrix();
-	glTranslatef(0, 0, -75);
-	glColor3f(0, 0, 1.0);
-	glPointSize(5);
-	glBegin(GL_POLYGON);
-
-	glVertex3f(-x, y, -z);
-	glVertex3f(x, y, -z);
-	glVertex3f(x, y, z-10);
-	glVertex3f(-x, y, z-10);
-
-	glEnd();
-
-	glPopMatrix();
-}
-
-
 
 void ReadFileCar(model *car) {
 	string input;
@@ -527,5 +586,23 @@ void crash(const char *str, float size)
 	for (int i = 0; i<strlen(str); i++)
 		glutStrokeCharacter(GLUT_STROKE_ROMAN, str[i]);
 	glPopMatrix();
+
+}
+
+void Gatemove(float Ypos) {
+
+		/*BRIDGE- PINK Ïpen
+		(-150, 140)	(-50, 25)
+		(-150, 90)	(-50,-25)
+		*/
+		glRotatef(1, 0, 1, 0);
+		glTranslatef(0, sin(1), 0);
+		glColor3f(1.0, 0.20, 0.80);
+		glBegin(GL_POLYGON);
+		glVertex2f(-150.0, 25);
+		glVertex2f(-150.0, -25);
+		glVertex2f(-50.0, -25);
+		glVertex2f(-50.0, 25);
+		glEnd();
 
 }

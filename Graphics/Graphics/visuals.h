@@ -84,3 +84,4 @@ void crash(const char*, float);
 
 void Track(int x, int y, int z);
 static void torus(float inner, float outer, unsigned int pts);
+void Gatemove(float Ypos);
