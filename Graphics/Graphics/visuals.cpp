@@ -211,7 +211,6 @@ void Render()
 	/*Light*/
 	glLoadIdentity();
 	glTranslatef(-3, height, Cz-R1-offset-2);
-	glRotatef(60, 0, 60, 0);
 	glScalef(0.25f, 0.25f, 0.25f);
 	glColor3f(0.749020, 0.749020, 0.749020);                            // Set drawing colour
 	glCallList(lightId);
@@ -332,11 +331,15 @@ void Setup()  // TOUCH IT !!
 
 	//Set up light source
 	//glTranslatef(-3, height, Cz-R1-offset-2);
-	GLfloat green_light_position[] = { -3, height, Cz - R1 - offset, 1.0 };
+	GLfloat green_light_position[] = { -3, height, Cz - R1 - offset-1, 1.0 };
 	glLightfv(GL_LIGHT1, GL_POSITION, green_light_position);
 
+	//EDWWWWWWWW
 	GLfloat specularLight[] = { 0.0, 1.0, 0.0, 1.0 };
-	glLightfv(GL_LIGHT1, GL_DIFFUSE, specularLight);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
+	GLfloat specref[] = { 1.0, 1.0, 1.0, 1.0 };
+	glMaterialfv(GL_FRONT, GL_SPECULAR, specref);
+	glMateriali(GL_FRONT, GL_SHININESS, 64);
 
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
