@@ -1,11 +1,13 @@
 #include "visuals.h"
 #include "time.h"
 
-
-
 model compCar;
 model userCar;
 model light;
+
+int compCarId;
+int userCarId;
+int lightId;
 
 carMovement compCarM;
 carMovement userCarM;
@@ -14,38 +16,20 @@ bool fullscreen = false;
 
 bool crashFlag = false;
 
-float R1 = 15;
-float R2 = 10;
-float C1x = 20;
-float C2x = -20;
+float R1 = 12.5;
+float R2 = 7.5;
+float C1x = 15;
+float C2x = -15;
 float Cz = -30;
+float height = -7.5;
 
-float acc = 0.5f;
+float acc = 0.1f;
+float v_max = 1.25f;
 
-
-// angle of rotation for the camera direction
-float angle = 0.0;
-// actual vector representing the camera's direction
-float lx = 0.0f, lz = -1.0f;
-// XZ position of the camera
-float x = 0.0f, z = 5.0f;
-
+time_t current, crashTime = -1;
 
 using namespace std;
 
-void axes()
-{
-	glColor3f(0.6, 0.6, 0.6);
-	glPushMatrix();
-	glTranslatef(0, 0, -1.0);
-	glBegin(GL_LINES);
-	glVertex2f(0.0, 0.0);
-	glVertex2f(100.0, 0.0);
-	glVertex2f(0.0, 0.0);
-	glVertex2f(0.0, 100.0);
-	glEnd();
-	glPopMatrix();
-}
 
 void Render()
 {
@@ -56,17 +40,16 @@ void Render()
 	glLoadIdentity();
 	
 	
-	gluLookAt(x, 1.0f, z, x + lx, 1.0f, z + lz, 0.0f, 1.0f, 0.0f);
-
-	cout << time(NULL) << endl;
+	current = time(NULL);
 
 	glPushMatrix();
-	glTranslatef(userCarM.tx, 0, userCarM.tz);
+	glTranslatef(userCarM.tx, height, userCarM.tz);
 	glRotatef(userCarM.roty, 0, 90, 0);
 	glRotatef(userCarM.rotx, 180, 0, 0);
-	glScalef(0.01f, 0.01f, 0.01f);
+	glScalef(0.01f, 0.01, 0.01);
 	glColor3f(1.0, 1.0, 1.0);                            // Set drawing colour
-	DisplayCar(userCar);
+	//DisplayCar(userCar);
+	glCallList(userCarId);
 	
 	RenderUserCar();
 
@@ -74,45 +57,20 @@ void Render()
 
 
 	glPushMatrix();
-	glTranslatef(compCarM.tx, 0, compCarM.tz);
+	glTranslatef(compCarM.tx, height, compCarM.tz);
 	glRotatef(compCarM.roty, 0, 90, 0);
 	glRotatef(compCarM.rotx, 180, 0, 0);
 	glScalef(0.01f, 0.01f, 0.01f);
 	glColor3f(1.0, 1.0, 1.0);                            // Set drawing colour
-	DisplayCar(compCar);
+	//DisplayCar(compCar);
+	glCallList(compCarId);
 
 	RenderCompCar();
 
 	glPopMatrix();
+	
 
-	/*
-	if (tx >= C1x) {
-		rightCycle();
-	}
-	else if (tx <= C2x) {
-		leftCycle();
-	}
-	else{
-		if (firstTime) {
-			firstTime = false;
-		}
-		if (rightFlag) {
-			tx += acc;//*time;
-			if (tx > C1x) {
-				rightCycle();
-			}
-		}
-		if (leftFlag) {
-			tx -= acc;//*time;
-			if (tx < C2x) {
-				leftCycle();
-			}
-
-		}
-	}
-	glPopMatrix();
-	*/
-
+	
 	//torus(50, 20, 30);
 
 	
@@ -122,24 +80,25 @@ void Render()
 
 
 	/*Light*/
-	/*glPushMatrix();
+	glPushMatrix();
 
 	glTranslatef(0, 0, -100);
 	//glRotatef(45, 0, 1, 0);
 	//glRotatef(rotx, 180, 0, 0);
 	//glScalef(0.25f, 0.25f, 0.25f);
 	glColor3f(0.749020, 0.749020, 0.749020);                            // Set drawing colour
-	DisplayLight(light);
+	//DisplayLight(light);
+	glCallList(lightId);
 	glPopMatrix();
 
-	*/
+	
 	
 	glPushMatrix();
 	glTranslatef(0, 0, 0);
 	glColor3f(0.0, 1.0, 1.0);
 	glPointSize(5);
 	glBegin(GL_POINTS);
-	glVertex3f(C1x, 0, Cz);
+	glVertex3f(C1x, height, Cz);
 	glEnd();
 	glPopMatrix();
 
@@ -148,16 +107,47 @@ void Render()
 	glColor3f(0.0, 1.0, 1.0);
 	glPointSize(5);
 	glBegin(GL_POINTS);
-	glVertex3f(C2x, 0, Cz);
+	glVertex3f(C2x, height, Cz);
 	glEnd();
 	glPopMatrix();
 	
-
-	glPushMatrix();
-
 
 	if (crashFlag) {
 		crash("CRASH!", 0.05f);
+		if (crashTime < 0) {
+			crashTime = current;
+			
+			compCarM.acc = 0;
+			userCarM.acc = 0;
+
+			compCarM.leftFlag = false;
+			compCarM.rightFlag = true;
+			compCarM.firstTime = false;
+			compCarM.tx = 0.0;
+			compCarM.tz = Cz + R2;
+			compCarM.rotx = 270.0;
+			compCarM.roty = 180;
+			compCarM.origRot = 180;
+
+			userCarM.leftFlag = false;
+			userCarM.rightFlag = true;
+			userCarM.firstTime = false;
+			userCarM.tx = 0.0;
+			userCarM.tz = Cz + R1;
+			userCarM.rotx = 270.0;
+			userCarM.roty = 180;
+			userCarM.origRot = 180;
+
+			cout << difftime(crashTime, current) << endl;
+		}
+		cout << difftime(current, crashTime) << endl;
+		if (crashFlag && difftime(current, crashTime) >= 3) {
+			cout << "HERE\n";
+			crashFlag = false;
+			crashTime = -1;
+			compCarM.acc = 0.25;
+			userCarM.acc = 0.25;
+		}
 	}
 	
 
@@ -197,6 +187,9 @@ void Setup()  // TOUCH IT !!
 	ReadFileCar(&userCar);
 	ReadFileCar(&compCar);
 	ReadFileLight(&light);
+	userCarId = DisplayCar(userCar);
+	compCarId = DisplayCar(compCar);
+	lightId = DisplayLight(light);
 
 	//Parameter handling
 	glShadeModel(GL_SMOOTH);
@@ -239,7 +232,7 @@ void Setup()  // TOUCH IT !!
 	compCarM.firstTime = false;
 	compCarM.tx = 0.0;
 	compCarM.tz = Cz + R2;
-	compCarM.acc = 2.5;
+	compCarM.acc = 0.25;
 	compCarM.rotx = 270.0;
 	compCarM.roty = 180;
 	compCarM.origRot = 180;
@@ -249,7 +242,7 @@ void Setup()  // TOUCH IT !!
 	userCarM.firstTime = false;
 	userCarM.tx = 0.0;
 	userCarM.tz = Cz + R1;
-	userCarM.acc = 2.5;
+	userCarM.acc = 0.25;
 	userCarM.rotx = 270.0;
 	userCarM.roty = 180;
 	userCarM.origRot = 180;
@@ -400,86 +393,51 @@ void ReadFileLight(model *traffic_light) {
 }
 
 
-void DisplayCar(model md)
+int DisplayCar(model md)
 {
+	int id;
+	id = glGenLists(1);
+	glNewList(id, GL_COMPILE);
 
-	glPushMatrix();
 	glBegin(GL_TRIANGLES);
-
-
-	/*
-	for (face f : md.faces) {
-		glVertex3f(md.vertices.at(f.vtx[0] - 1).x, md.vertices.at(f.vtx[0] - 1).y, md.vertices.at(f.vtx[0] - 1).z);
-		glVertex3f(md.vertices.at(f.vtx[1] - 1).x, md.vertices.at(f.vtx[1] - 1).y, md.vertices.at(f.vtx[1] - 1).z);
-		glVertex3f(md.vertices.at(f.vtx[2] - 1).x, md.vertices.at(f.vtx[2] - 1).y, md.vertices.at(f.vtx[2] - 1).z);
-	}
-	*/
-	
 	
 	for (vector<face>::iterator it = md.faces.begin(); it != md.faces.end(); it++) {
+
 		glVertex3f(md.vertices.at(it->vtx[0] - 1).x, md.vertices.at(it->vtx[0] - 1).y, md.vertices.at(it->vtx[0] - 1).z);
 		glVertex3f(md.vertices.at(it->vtx[1] - 1).x, md.vertices.at(it->vtx[1] - 1).y, md.vertices.at(it->vtx[1] - 1).z);
 		glVertex3f(md.vertices.at(it->vtx[2] - 1).x, md.vertices.at(it->vtx[2] - 1).y, md.vertices.at(it->vtx[2] - 1).z);
 	}
-	
-	/*
-	for (int i = 0; i < md.faces; i++)
-	{
-		glVertex3f(md.obj_points[md.obj_faces[i].vtx[0] - 1].x, md.obj_points[md.obj_faces[i].vtx[0] - 1].y, md.obj_points[md.obj_faces[i].vtx[0] - 1].z);
-		glVertex3f(md.obj_points[md.obj_faces[i].vtx[1] - 1].x, md.obj_points[md.obj_faces[i].vtx[1] - 1].y, md.obj_points[md.obj_faces[i].vtx[1] - 1].z);
-		glVertex3f(md.obj_points[md.obj_faces[i].vtx[2] - 1].x, md.obj_points[md.obj_faces[i].vtx[2] - 1].y, md.obj_points[md.obj_faces[i].vtx[2] - 1].z);
-	}
-	*/
 
 	glEnd();
-	glPopMatrix();
 
+	glEndList();
+
+	return id;
 }
 
 
-void DisplayLight(model md) {
-	glPushMatrix();
+int DisplayLight(model md) {
+	int id;
+	id = glGenLists(1);
+	glNewList(id, GL_COMPILE);
+
 	glBegin(GL_TRIANGLES);
 
+	for (vector<face>::iterator it = md.faces.begin(); it != md.faces.end(); it++) {	
+		glNormal3f(md.normals.at(it->vn[0] - 1).x, md.normals.at(it->vn[0] - 1).y, md.normals.at(it->vn[0] - 1).z);
+		glNormal3f(md.normals.at(it->vn[1] - 1).x, md.normals.at(it->vn[1] - 1).y, md.normals.at(it->vn[1] - 1).z);
+		glNormal3f(md.normals.at(it->vn[2] - 1).x, md.normals.at(it->vn[2] - 1).y, md.normals.at(it->vn[2] - 1).z);
 
-	/*
-	for (face f : md.faces) {
-	glVertex3f(md.vertices.at(f.vtx[0] - 1).x, md.vertices.at(f.vtx[0] - 1).y, md.vertices.at(f.vtx[0] - 1).z);
-	glVertex3f(md.vertices.at(f.vtx[1] - 1).x, md.vertices.at(f.vtx[1] - 1).y, md.vertices.at(f.vtx[1] - 1).z);
-	glVertex3f(md.vertices.at(f.vtx[2] - 1).x, md.vertices.at(f.vtx[2] - 1).y, md.vertices.at(f.vtx[2] - 1).z);
-	}
-	*/
-
-
-	for (vector<face>::iterator it = md.faces.begin(); it != md.faces.end(); it++) {
-		/*
-		glVertex3f(md.vertices.at(it->vtx[0] - 1).x + md.normals.at(it->vn[0] - 1).x*5.0,
-				   md.vertices.at(it->vtx[0] - 1).y + md.normals.at(it->vn[0] - 1).y*5.0,
-				   md.vertices.at(it->vtx[0] - 1).z + md.normals.at(it->vn[0] - 1).z*5.0);
-		glVertex3f(md.vertices.at(it->vtx[1] - 1).x + md.normals.at(it->vn[1] - 1).x*5.0,
-				   md.vertices.at(it->vtx[1] - 1).y + md.normals.at(it->vn[1] - 1).y*5.0,
-				   md.vertices.at(it->vtx[1] - 1).z + md.normals.at(it->vn[1] - 1).z*5.0);
-		glVertex3f(md.vertices.at(it->vtx[2] - 1).x + md.normals.at(it->vn[2] - 1).x*5.0,
-				   md.vertices.at(it->vtx[2] - 1).y + md.normals.at(it->vn[2] - 1).y*5.0,
-				   md.vertices.at(it->vtx[2] - 1).z + md.normals.at(it->vn[2] - 1).z*5.0);
-		*/
-		
 		glVertex3f(md.vertices.at(it->vtx[0] - 1).x, md.vertices.at(it->vtx[0] - 1).y, md.vertices.at(it->vtx[0] - 1).z);
 		glVertex3f(md.vertices.at(it->vtx[1] - 1).x, md.vertices.at(it->vtx[1] - 1).y, md.vertices.at(it->vtx[1] - 1).z);
 		glVertex3f(md.vertices.at(it->vtx[2] - 1).x, md.vertices.at(it->vtx[2] - 1).y, md.vertices.at(it->vtx[2] - 1).z);
 	}
 
-	/*
-	for (int i = 0; i < md.faces; i++)
-	{
-	glVertex3f(md.obj_points[md.obj_faces[i].vtx[0] - 1].x, md.obj_points[md.obj_faces[i].vtx[0] - 1].y, md.obj_points[md.obj_faces[i].vtx[0] - 1].z);
-	glVertex3f(md.obj_points[md.obj_faces[i].vtx[1] - 1].x, md.obj_points[md.obj_faces[i].vtx[1] - 1].y, md.obj_points[md.obj_faces[i].vtx[1] - 1].z);
-	glVertex3f(md.obj_points[md.obj_faces[i].vtx[2] - 1].x, md.obj_points[md.obj_faces[i].vtx[2] - 1].y, md.obj_points[md.obj_faces[i].vtx[2] - 1].z);
-	}
-	*/
-
 	glEnd();
-	glPopMatrix();
+
+	glEndList();
+
+	return id;
 }
 
 
@@ -524,7 +482,7 @@ void Keyboard(unsigned char key, int x, int y)
 
 
 void Arrows(int key, int x, int y) {
-	
+	cout << "KEY\n";
 	switch (key) {
 	case GLUT_KEY_UP:
 		Up();
@@ -534,47 +492,27 @@ void Arrows(int key, int x, int y) {
 		break;
 	default:
 		break;
-	}
-	
-
-	/*
-	float fraction = 1.0f;
-
-	switch (key) {
-	case GLUT_KEY_LEFT:
-		angle -= 0.01f;
-		lx = sin(angle);
-		lz = -cos(angle);
-		break;
-	case GLUT_KEY_RIGHT:
-		angle += 0.01f;
-		lx = sin(angle);
-		lz = -cos(angle);
-		break;
-	case GLUT_KEY_UP:
-		x += lx * fraction;
-		z += lz * fraction;
-		break;
-	case GLUT_KEY_DOWN:
-		x -= lx * fraction;
-		z -= lz * fraction;
-		break;
-	}
-	*/
+	}	
 }
 
 
 void Up() {
-	userCarM.acc += acc;
+	if(!crashFlag) userCarM.acc += acc;
 }
 
 
 void Down() {
-	userCarM.acc -= acc;
+	if (!crashFlag)	userCarM.acc -= acc;
+	if (userCarM.acc < 0) userCarM.acc = 0;
 }
 
 
 void rightCycle(carMovement* car, float R) {
+	if (car->acc >= v_max) {
+		crashFlag = true;
+		return;
+	}
+
 	if (!car->firstTime) {
 		car->firstTime = true;
 		car->origTx = C1x;
@@ -620,6 +558,12 @@ void rightCycle(carMovement* car, float R) {
 
 
 void leftCycle(carMovement *car, float R) {
+	if (car->acc >= v_max) {
+		crashFlag = true;
+		return;
+	}
+
+
 	if (!car->firstTime) {
 		car->firstTime = true;
 		car->origTx = C2x;

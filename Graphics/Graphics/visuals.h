@@ -89,8 +89,8 @@ void Idle();
 void ReadFileCar(model*);
 void ReadFileLight(model*);
 
-void DisplayCar(model);
-void DisplayLight(model);
+int DisplayCar(model);
+int DisplayLight(model);
 
 void RenderUserCar();
 void RenderCompCar();
