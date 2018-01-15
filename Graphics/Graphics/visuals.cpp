@@ -16,15 +16,22 @@ bool fullscreen = false;
 
 bool crashFlag = false;
 
-float R1 = 20;
-float R2 = 15;
-float C1x = 40;
-float C2x = -40;
+bool redFlag = false;
+bool orangeFlag = false;
+bool greenFlag = true;
+
+float R1 = 12.5;
+float R2 = 7.5;
+float C1x = 12.5;
+float C2x = -12.5;
 float Cz = -50;
 float height = -7.5;
 
 float acc = 0.1f;
 float v_max = 1.25f;
+
+float move_x = 0.0f, move_y = 0.0f;
+float angle = 0;
 
 time_t current, crashTime = -1;
 
@@ -128,9 +135,13 @@ void Render()
 	glVertex3f(-5.0, height, Cz - R2);
 	glVertex3f(-5.0, height, Cz - R1);
 
-	glVertex3f(C2x, height, Cz - R1);
-	glVertex3f(C2x, height, Cz - R2);
+	glVertex3f(C2x+move_x, height+move_y, Cz - R1);
+	glVertex3f(C2x+move_x, height+ move_y, Cz - R2);
 	glEnd();
+
+	if (redFlag) {
+		Gatemove(1);
+	}
 
 
 	//Semi circle right
@@ -533,6 +544,11 @@ void Keyboard(unsigned char key, int x, int y)
 	case 'C':
 		crashFlag = !crashFlag;
 		break;
+	case 'r':
+	case 'R':
+		redFlag = !redFlag;
+		greenFlag = !greenFlag;
+		break;
 	default: break;
 	}
 
@@ -775,6 +791,7 @@ void Gatemove(float Ypos) {
 	(-150, 140)	(-50, 25)
 	(-150, 90)	(-50,-25)
 	*/
+	/*
 	glColor3f(1.0, 0.24, 0.75);
 	glBegin(GL_POLYGON);
 	int a = Cz - R1;
@@ -783,5 +800,11 @@ void Gatemove(float Ypos) {
 	glVertex3f(-5.0, height, Cz - R2);
 	glVertex3f(-5.0, height, Cz - R1);
 	glEnd();
+	*/
+
+	angle += 0.1f;
+
+	move_x = 35 - 35*cos(angle);
+	move_y = 35*sin(angle);
 
 }
