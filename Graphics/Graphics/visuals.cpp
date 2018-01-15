@@ -16,11 +16,11 @@ bool fullscreen = false;
 
 bool crashFlag = false;
 
-float R1 = 12.5;
-float R2 = 7.5;
-float C1x = 15;
-float C2x = -15;
-float Cz = -30;
+float R1 = 20;
+float R2 = 15;
+float C1x = 40;
+float C2x = -40;
+float Cz = -50;
 float height = -7.5;
 
 float acc = 0.1f;
@@ -40,33 +40,34 @@ void Render()
 	glLoadIdentity();
 	
 	//Set position
-	glTranslatef(0.0, 0.0, -250.0);
-	glRotatef(-50, 1, 0, 0);
+	//glTranslatef(0.0, 0.0, -250.0);
+	//glRotatef(-50, 1, 0, 0);
 
 	//Track
 
 	/* UPPER STRAIGHT TRACK
-	(200, 25)(�)			(D)(-50, 25)
-	(200,-25)(�)			(C)(-50,-25)
+	(20, )(Α)			(D)(-50, 25)
+	(200,-25)(Β)			(C)(-50,-25)
 
 	second part
 	(-200, 25)	(-150, 25)
 	(-200, -25)	(-150, -25)
 	*/
+
 	glColor3f(0.0, 0.0, 1.0);											//make the colour blue (lower)
 	glBegin(GL_QUADS);									
-	glVertex2f(200.0, 25.0);										
-	glVertex2f(200.0, -25.0);	
-	glVertex2f(-50.0, -25.0);
-	glVertex2f(-50.0, 25.0);
+	glVertex3f(C1x, height, Cz-R2);										
+	glVertex3f(C1x, height, Cz-R1);
+	glVertex3f(-5.0, height, Cz-R1);
+	glVertex3f(-5.0, height, Cz-R2);
 	glEnd();
 
 	glColor3f(0.0, 0.0, 1.0);											//make the colour blue (lower)
 	glBegin(GL_QUADS);
-	glVertex2f(-200.0, 25.0);
-	glVertex2f(-200.0, -25.0);
-	glVertex2f(-150.0, -25.0);
-	glVertex2f(-150.0, 25.0);
+	glVertex3f(-20.0, height, 2.5);
+	glVertex3f(-20.0, height,-2.5);
+	glVertex3f(-5.0, height,-2.5);
+	glVertex3f(-5.0, height, 2.5);
 	glEnd();
 
 	/* DOWN STRAIGHT TRACK
@@ -75,10 +76,10 @@ void Render()
 	*/
 	glColor3f(0.0, 0.0, 1.0);											//make the colour blue (lower)
 	glBegin(GL_QUADS);
-	glVertex2f(-200.0, -75.0);
-	glVertex2f(-200.0, -125.0);
-	glVertex2f(200.0, -125.0);
-	glVertex2f(200.0, -75.0);
+	glVertex3f(C1x, height, Cz + R2);
+	glVertex3f(C1x, height, Cz + R1);
+	glVertex3f(C2x, height, Cz + R1);
+	glVertex3f(C2x, height, Cz + R2);
 	glEnd();
 
 	/*WHITE BOXES at down straight track
@@ -93,7 +94,7 @@ void Render()
 
 	*/
 
-	glColor3f(1.0, 1.0, 1.0);
+	/*glColor3f(1.0, 1.0, 1.0);
 	glBegin(GL_POLYGON);
 	glVertex2f(-150.0, -87.5);
 	glVertex2f(-150.0, -93.75);
@@ -115,61 +116,54 @@ void Render()
 	glVertex2f(-150.0, -118.75);
 	glVertex2f(-140.0, -118.75);
 	glVertex2f(-140.0, -112.5);
-	glEnd();
-
-	/*BRIDGE- PINK Closed
-	(-150, 25)	(-50, 25)
-	(-150,-25)	(-50,-25)
-	*/
-
-	/*glColor3f(1.0, 0.20, 0.80);
-	glBegin(GL_POLYGON);
-	glVertex2f(-150.0, 25);
-	glVertex2f(-150.0, -25);
-	glVertex2f(-50.0, -25);
-	glVertex2f(-50.0, 25);
 	glEnd();*/
 
-	int i = 0;
-	for (i = 0; i < 30; i++) {
-		Gatemove(10);
-	}
+	/*BRIDGE- PINK Closed
+	*/
+	glLoadIdentity();
+	glColor3f(1.0, 0.24, 0.75);
+	//glRotatef(90, 0, 0, 90);
+	glBegin(GL_POLYGON);
+
+	glVertex3f(-5.0, height, Cz - R2);
+	glVertex3f(-5.0, height, Cz - R1);
+
+	glVertex3f(C2x, height, Cz - R1);
+	glVertex3f(C2x, height, Cz - R2);
+	glEnd();
 
 
 	//Semi circle right
+	glPushMatrix();
 	glColor3f(0.0, 0.0, 1.0);
 	glLoadIdentity();
-	glTranslatef(0.0, 0.0, -250.0);
-	glRotatef(-50, 1, 0, 0);
 
-	glTranslatef(200.0, -50.0, 0.0);
+	glTranslatef(C1x, height, Cz);
+	glRotatef(90, 90, 0, 0);
 	GLUquadric* quad;
 	quad = gluNewQuadric();
-	gluPartialDisk(quad, 25.0, 75.0, 100.0, 3, 0.0, 180.0);
+	gluPartialDisk(quad, R2, R1, 100.0, 3, 0.0, 180.0);
+	glPopMatrix();
 
 	//Semi circle left
 	glLoadIdentity();
-	glTranslatef(0.0, 0.0, -250.0);
-	glRotatef(-50, 1, 0, 0);
+	glPushMatrix();
 
+	glTranslatef(C2x, height, Cz);
 	glRotatef(-180.0, 0, 0, 1);
-	glTranslatef(200.0, 50.0, 0.0);
+	glRotatef(90, 90, 0, 0);
 
 	glColor3f(0.0, 0.0, 1.0);
-	gluPartialDisk(quad, 25.0, 75.0, 100.0, 3, 0.0, 180.0);
+	gluPartialDisk(quad, R2, R1, 100.0, 3, 0.0, 180.0);
 
+	glPopMatrix();
 
-	/*
-	glPushMatrix();
-	glTranslatef(0, 0, -250);
-	glTranslatef(tx, -80, 0.0);
-	glRotatef(rotz, 0, 90, 0);
-	glRotatef(rotx, 180, 0, 0);
-	glScalef(0.25f, 0.25f, 0.25f);
-	
+	glLoadIdentity();
+
 	current = time(NULL);
 
 	glPushMatrix();
+
 	glTranslatef(userCarM.tx, height, userCarM.tz);
 	glRotatef(userCarM.roty, 0, 90, 0);
 	glRotatef(userCarM.rotx, 180, 0, 0);
@@ -184,6 +178,7 @@ void Render()
 
 
 	glPushMatrix();
+
 	glTranslatef(compCarM.tx, height, compCarM.tz);
 	glRotatef(compCarM.roty, 0, 90, 0);
 	glRotatef(compCarM.rotx, 180, 0, 0);
@@ -199,19 +194,16 @@ void Render()
 
 
 	/*Light*/
-	glPushMatrix();
-
-	glTranslatef(0, 0, -100);
-	//glRotatef(45, 0, 1, 0);
+	glLoadIdentity();
 	//glRotatef(rotx, 180, 0, 0);
+	glTranslatef(-15, 0, -250);
 	//glScalef(0.25f, 0.25f, 0.25f);
 	glColor3f(0.749020, 0.749020, 0.749020);                            // Set drawing colour
 	//DisplayLight(light);
 	glCallList(lightId);
-	glPopMatrix();
 
-	
-	
+
+	glLoadIdentity();
 	glPushMatrix();
 	glTranslatef(0, 0, 0);
 	glColor3f(0.0, 1.0, 1.0);
@@ -291,7 +283,7 @@ void Resize(int w, int h)
 
 	//glOrtho (-50.0f, 50.0f, -50.0f, 50.0f,-1000.0f,1000.0f);
 	float aspect = (float)w / (float)h;
-	gluPerspective(100.0, aspect, 1.0, 500.0);
+	gluPerspective(30.0, aspect, 1.0, 500.0);
 }
 
 
@@ -312,35 +304,6 @@ void Setup()  // TOUCH IT !!
 
 	//Parameter handling
 	glShadeModel(GL_SMOOTH);
-
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);  //renders a fragment if its z value is less or equal of the stored value
-	glClearDepth(1);
-
-	// polygon rendering mode
-	glEnable(GL_COLOR_MATERIAL);
-	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-
-	//Set up light source
-	GLfloat light_position[] = { 0.0, 30.0, 50.0, 0.0 };
-	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-
-	GLfloat ambientLight[] = { 0.3, 0.3, 0.3, 1.0 };
-	GLfloat diffuseLight[] = { 0.8, 0.8, 0.8, 1.0 };
-	GLfloat specularLight[] = { 1.0, 1.0, 1.0, 1.0 };
-
-
-	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
-
-
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
-	glEnable(GL_POINT_SMOOTH);
-
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-	
 
 	// Black background
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -808,18 +771,17 @@ void crash(const char *str, float size)
 
 void Gatemove(float Ypos) {
 
-		/*BRIDGE- PINK �pen
-		(-150, 140)	(-50, 25)
-		(-150, 90)	(-50,-25)
-		*/
-		glRotatef(1, 0, 1, 0);
-		glTranslatef(0, sin(1), 0);
-		glColor3f(1.0, 0.20, 0.80);
-		glBegin(GL_POLYGON);
-		glVertex2f(-150.0, 25);
-		glVertex2f(-150.0, -25);
-		glVertex2f(-50.0, -25);
-		glVertex2f(-50.0, 25);
-		glEnd();
+	/*BRIDGE- PINK open
+	(-150, 140)	(-50, 25)
+	(-150, 90)	(-50,-25)
+	*/
+	glColor3f(1.0, 0.24, 0.75);
+	glBegin(GL_POLYGON);
+	int a = Cz - R1;
+	glVertex3f(C2x, height, Cz - R1);
+	glVertex3f(C2x, height, Cz - R2);
+	glVertex3f(-5.0, height, Cz - R2);
+	glVertex3f(-5.0, height, Cz - R1);
+	glEnd();
 
 }
