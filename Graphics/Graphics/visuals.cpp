@@ -24,7 +24,8 @@ float R1 = 13;
 float R2 = 8;
 float C1x = 15;
 float C2x = -15;
-float Cz = -34;
+//float Cz = -34;
+float Cz = -60;
 float height = -7.5;
 float offset = 2.5;
 
@@ -36,6 +37,8 @@ float angle = 0;
 
 time_t current, crashTime, redlight_t, greenlight_t, orangelight_t= -1;
 clock_t redlight, current_cl = -1;
+
+int minTime = 1, maxTime = 15;
 
 using namespace std;
 
@@ -52,6 +55,8 @@ void Render()
 	current_cl = clock();
 	light_controller();
 	//Set position
+
+	cout << compCarM.tx << endl;
 
 	//Track
 
@@ -72,7 +77,7 @@ void Render()
 	glVertex3f(-5.0, height, Cz-R1-offset);
 	glVertex3f(-5.0, height, Cz-R2+offset);
 	glEnd();
-
+	
 	glColor3f(0.0, 0.0, 1.0);											//make the colour blue (lower)
 	glBegin(GL_QUADS);
 	glVertex3f(-20.0, height, 2.5-offset);
@@ -80,11 +85,12 @@ void Render()
 	glVertex3f(-5.0, height, -2.5-offset);
 	glVertex3f(-5.0, height, 2.5-offset);
 	glEnd();
-
+	
 	/* DOWN STRAIGHT TRACK
 	(-200, -75)(A)	 (D)(200, -75)
 	(-200, -125)(B)	 (C)(200, -125)
 	*/
+	
 	glColor3f(0.0, 0.0, 1.0);											//make the colour blue (lower)
 	glBegin(GL_QUADS);
 	glVertex3f(C1x, height, Cz + R2 - offset);
@@ -92,7 +98,7 @@ void Render()
 	glVertex3f(C2x, height, Cz + R1 + offset);
 	glVertex3f(C2x, height, Cz + R2 - offset);
 	glEnd();
-
+	
 	/*WHITE BOXES at down straight track*/
 
 	glColor3f(1.0, 1.0, 1.0);
@@ -262,11 +268,11 @@ void Render()
 			userCarM.roty = 180;
 			userCarM.origRot = 180;
 
-			cout << difftime(crashTime, current) << endl;
+			//cout << difftime(crashTime, current) << endl;
 		}
-		cout << difftime(current, crashTime) << endl;
+		//cout << difftime(current, crashTime) << endl;
 		if (crashFlag && difftime(current, crashTime) >= 3) {
-			cout << "HERE\n";
+			//cout << "HERE\n";
 			crashFlag = false;
 			crashTime = -1;
 			compCarM.acc = 0.25;
@@ -314,6 +320,7 @@ void Setup()  // TOUCH IT !!
 	userCarId = DisplayCar(userCar);
 	compCarId = DisplayCar(compCar);
 	lightId = DisplayLight(light);
+	srand(time(NULL));
 
 	//Parameter handling
 	glShadeModel(GL_SMOOTH);
@@ -323,6 +330,7 @@ void Setup()  // TOUCH IT !!
 
 	//Set up light source
 	//SUN
+	/*
 	GLfloat light_position[] = { 0.0, 30.0, 50.0, 0.0 };
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
@@ -343,7 +351,29 @@ void Setup()  // TOUCH IT !!
 
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
-	glEnable(GL_LIGHT1);
+	//glEnable(GL_LIGHT1);
+	*/
+
+	glEnable(GL_COLOR_MATERIAL);
+	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+
+	//Set up light source
+	GLfloat light_position[] = { 0.0, 30.0, 50.0, 0.0 };
+	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+
+	GLfloat ambientLight[] = { 0.3, 0.3, 0.3, 1.0 };
+	GLfloat diffuseLight[] = { 0.8, 0.8, 0.8, 1.0 };
+	GLfloat specularLight[] = { 1.0, 1.0, 1.0, 1.0 };
+
+
+	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
+
+
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	// Black background
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -502,6 +532,47 @@ int DisplayCar(model md)
 	glBegin(GL_TRIANGLES);
 	
 	for (vector<face>::iterator it = md.faces.begin(); it != md.faces.end(); it++) {
+		float i, j, k;
+
+		/*
+		i = ((md.vertices.at(it->vtx[0] - 1).y - md.vertices.at(it->vtx[1] - 1).y)*(md.vertices.at(it->vtx[1] - 1).z - md.vertices.at(it->vtx[2] - 1).z)
+			- (md.vertices.at(it->vtx[1] - 1).y - md.vertices.at(it->vtx[2] - 1).y)*(md.vertices.at(it->vtx[0] - 1).z - md.vertices.at(it->vtx[1] - 1).z));
+		j = -((md.vertices.at(it->vtx[0] - 1).x - md.vertices.at(it->vtx[1] - 1).x)*(md.vertices.at(it->vtx[1] - 1).z - md.vertices.at(it->vtx[2] - 1).z)
+			- (md.vertices.at(it->vtx[1] - 1).x - md.vertices.at(it->vtx[2] - 1).x)*(md.vertices.at(it->vtx[0] - 1).z - md.vertices.at(it->vtx[1] - 1).z));
+		k = ((md.vertices.at(it->vtx[0] - 1).x - md.vertices.at(it->vtx[1] - 1).x)*(md.vertices.at(it->vtx[1] - 1).y - md.vertices.at(it->vtx[2] - 1).y)
+			- (md.vertices.at(it->vtx[1] - 1).x - md.vertices.at(it->vtx[2] - 1).x)*(md.vertices.at(it->vtx[0] - 1).y - md.vertices.at(it->vtx[1] - 1).y));
+		*/
+
+		/*
+		i = ((md.vertices.at(it->vtx[1] - 1).y - md.vertices.at(it->vtx[0] - 1).y)*(md.vertices.at(it->vtx[2] - 1).z - md.vertices.at(it->vtx[1] - 1).z)
+			- (md.vertices.at(it->vtx[2] - 1).y - md.vertices.at(it->vtx[1] - 1).y)*(md.vertices.at(it->vtx[1] - 1).z - md.vertices.at(it->vtx[0] - 1).z));
+		j = -((md.vertices.at(it->vtx[1] - 1).x - md.vertices.at(it->vtx[0] - 1).x)*(md.vertices.at(it->vtx[2] - 1).z - md.vertices.at(it->vtx[1] - 1).z)
+			- (md.vertices.at(it->vtx[2] - 1).x - md.vertices.at(it->vtx[1] - 1).x)*( md.vertices.at(it->vtx[1] - 1).z - md.vertices.at(it->vtx[0] - 1).z));
+		k = ((md.vertices.at(it->vtx[1] - 1).x - md.vertices.at(it->vtx[0] - 1).x)*(md.vertices.at(it->vtx[2] - 1).y - md.vertices.at(it->vtx[1] - 1).y)
+			- ( md.vertices.at(it->vtx[2] - 1).x - md.vertices.at(it->vtx[1] - 1).x)*(md.vertices.at(it->vtx[1] - 1).y) - md.vertices.at(it->vtx[0] - 1).y);
+		*/
+
+		/*
+		i = ((md.vertices.at(it->vtx[1] - 1).y - md.vertices.at(it->vtx[0] - 1).y)*(md.vertices.at(it->vtx[2] - 1).z - md.vertices.at(it->vtx[0] - 1).z)
+			- (md.vertices.at(it->vtx[2] - 1).y - md.vertices.at(it->vtx[0] - 1).y)*(md.vertices.at(it->vtx[1] - 1).z - md.vertices.at(it->vtx[0] - 1).z));
+		j = -((md.vertices.at(it->vtx[1] - 1).x - md.vertices.at(it->vtx[0] - 1).x)*(md.vertices.at(it->vtx[2] - 1).z - md.vertices.at(it->vtx[0] - 1).z)
+			- (md.vertices.at(it->vtx[2] - 1).x - md.vertices.at(it->vtx[0] - 1).x)*(md.vertices.at(it->vtx[1] - 1).z - md.vertices.at(it->vtx[0] - 1).z));
+		k = ((md.vertices.at(it->vtx[1] - 1).x - md.vertices.at(it->vtx[0] - 1).x)*(md.vertices.at(it->vtx[2] - 1).y - md.vertices.at(it->vtx[0] - 1).y)
+			- (md.vertices.at(it->vtx[2] - 1).x - md.vertices.at(it->vtx[0] - 1).x)*(md.vertices.at(it->vtx[1] - 1).y) - md.vertices.at(it->vtx[0] - 1).y);
+		*/
+
+		/*
+		i = ((md.vertices.at(it->vtx[0] - 1).y - md.vertices.at(it->vtx[1] - 1).y)*(md.vertices.at(it->vtx[0] - 1).z - md.vertices.at(it->vtx[2] - 1).z)
+			- (md.vertices.at(it->vtx[0] - 1).y - md.vertices.at(it->vtx[2] - 1).y)*(md.vertices.at(it->vtx[0] - 1).z - md.vertices.at(it->vtx[1] - 1).z));
+		j = -((md.vertices.at(it->vtx[0] - 1).x - md.vertices.at(it->vtx[1] - 1).x)*(md.vertices.at(it->vtx[0] - 1).z - md.vertices.at(it->vtx[2] - 1).z)
+			- (md.vertices.at(it->vtx[0] - 1).x - md.vertices.at(it->vtx[2] - 1).x)*(md.vertices.at(it->vtx[0] - 1).z - md.vertices.at(it->vtx[1] - 1).z));
+		k = ((md.vertices.at(it->vtx[0] - 1).x - md.vertices.at(it->vtx[1] - 1).x)*(md.vertices.at(it->vtx[0] - 1).y - md.vertices.at(it->vtx[2] - 1).y)
+			- (md.vertices.at(it->vtx[0] - 1).x - md.vertices.at(it->vtx[2] - 1).x)*(md.vertices.at(it->vtx[0] - 1).y - md.vertices.at(it->vtx[1] - 1).y));
+		*/
+
+		//float magnitude = sqrtf(powf(i,2)+ powf(j, 2)+ powf(k, 2));
+		
+		//glNormal3f(i/magnitude, j / magnitude, k / magnitude);
 
 		glVertex3f(md.vertices.at(it->vtx[0] - 1).x, md.vertices.at(it->vtx[0] - 1).y, md.vertices.at(it->vtx[0] - 1).z);
 		glVertex3f(md.vertices.at(it->vtx[1] - 1).x, md.vertices.at(it->vtx[1] - 1).y, md.vertices.at(it->vtx[1] - 1).z);
@@ -587,7 +658,7 @@ void Keyboard(unsigned char key, int x, int y)
 
 
 void Arrows(int key, int x, int y) {
-	cout << "KEY\n";
+	//cout << "KEY\n";
 	switch (key) {
 	case GLUT_KEY_UP:
 		Up();
@@ -605,10 +676,11 @@ void Up() {
 	if(!crashFlag) userCarM.acc += acc;
 }
 
-
+bool isSet = false;
 void Down() {
 	if (!crashFlag)	userCarM.acc -= acc;
 	if (userCarM.acc < 0) userCarM.acc = 0;
+	if (redFlag) isSet = true;
 }
 
 
@@ -621,7 +693,7 @@ void rightCycle(carMovement* car, float R) {
 	if (!car->firstTime) {
 		car->firstTime = true;
 		car->origTx = C1x;
-		car->origTz = Cz+R;
+		car->origTz = Cz;
 		car->origRot = 180;
 		if (car->tx > car->origTx) {
 			car->theta = (car->tx - car->origTx) / R;
@@ -644,11 +716,17 @@ void rightCycle(carMovement* car, float R) {
 		car->origTz = Cz;
 	}
 
+	//float temp = sqrtf(pow(R, 2) - pow((car->tx - C1x), 2));
+
 	if (car->theta <= PI/2) {
-		car->tz = car->origTz - R * cos(3*PI/2 + car->theta);
+		car->tz = car->origTz + R * cos(car->theta);
+		//if (temp + Cz > -temp + Cz) car->tz = temp + Cz;
+		//else  car->tz = -temp + Cz;
 	}
 	else{
-		car->tz = car->origTz - (R - R * cos(3*PI/2 + car->theta));
+		car->tz = car->origTz + R* cos(car->theta);
+		//if (temp + Cz > -temp + Cz) car->tz = -temp + Cz;
+		//else  car->tz = temp + Cz;
 	}
 
 	car->roty = car->origRot + car->theta*180/PI;
@@ -672,7 +750,7 @@ void leftCycle(carMovement *car, float R) {
 	if (!car->firstTime) {
 		car->firstTime = true;
 		car->origTx = C2x;
-		car->origTz = Cz-R;
+		car->origTz = Cz;
 		car->origRot = 0;
 		if (car->tx < car->origTx) {
 			car->theta = (car->origTx - car->tx)/R;
@@ -696,10 +774,10 @@ void leftCycle(carMovement *car, float R) {
 	car->tx = car->origTx - (R * sin(car->theta));
 
 	if (car->theta <= PI/2) {
-		car->tz = car->origTz + R * cos(3*PI/2 + car->theta);
+		car->tz = car->origTz - R * cos(car->theta);
 	}
 	else {
-		car->tz = car->origTz + (R - R * cos(3*PI/2 + car->theta));
+		car->tz = car->origTz - R * cos(car->theta);
 	}
 	
 	car->roty = car->origRot + car->theta*180/PI;
@@ -712,7 +790,35 @@ void leftCycle(carMovement *car, float R) {
 }
 
 
+bool isStopped = false;
 void RenderUserCar() {
+	if (redFlag) {
+		float temp = userCarM.tx;
+		if (isSet && temp - userCarM.acc <= -1 && temp + userCarM.acc > C2x && userCarM.tz < Cz) {
+			if (userCarM.tx != -1) {
+				isStopped = true;
+				userCarM.acc = 0;
+				userCarM.tx = -1;
+				return;
+			}
+			//cout << "HERE!!!!!!!!!!!!!!!!!~~~~~~~~~~~~~\n";
+		}
+		if (!isSet && temp - userCarM.acc < -1 && temp + userCarM.acc > C2x && userCarM.tz < Cz) {
+			crashFlag = true;
+			userCarM.acc = 0;
+		}
+		
+	}
+
+	if (isSet) {
+		if (!(userCarM.tx >= -1 && userCarM.tx < 2.5 && userCarM.tz < Cz)) isSet = false;
+		if (isStopped && greenFlag) {
+			isSet = false;
+			isStopped = false;
+			userCarM.acc = compCarM.acc;
+		}
+	}
+
 	if (userCarM.tx >= C1x) {
 		rightCycle(&userCarM, R1);
 	}
@@ -739,12 +845,20 @@ void RenderUserCar() {
 	}
 }
 
-
 void RenderCompCar() {
-	//to stop with traffic light
+	if (redFlag) {
+		//cout << "in " << redFlag << endl;
+		float temp = compCarM.tx;
+		if (temp - compCarM.acc < -1 && temp + compCarM.acc > C2x && compCarM.tz < Cz) {
+			if (compCarM.tx != -1) {
+				compCarM.tx = -1;
+			}
+			//cout << "HERE!!!!!!!!!!!!!!!!!~~~~~~~~~~~~~\n";
 
-	//
-	
+		}
+	}
+	//cout << "out " << redFlag << endl;
+
 	if (compCarM.tx >= C1x) {
 		rightCycle(&compCarM, R2);
 	}
@@ -769,6 +883,8 @@ void RenderCompCar() {
 
 		}
 	}
+	cout << compCarM.tx << "\t" << compCarM.tz << "\t" << compCarM.theta*180/PI << endl;
+
 }
 
 
@@ -819,7 +935,7 @@ void Gatemove(time_t time) {
 	double diffticks = current_cl - redlight;
 	double diffms = (diffticks) / (CLOCKS_PER_SEC / 1000);
 
-	cout << diffms << endl;
+	//cout << diffms << endl;
 
 	if (redFlag && diffms <= 2000 ) { //bridge opens
 		float perc = diffms / 2000;
@@ -848,18 +964,20 @@ void Gatemove(time_t time) {
 
 }
 
+time_t randDuration;
 void light_controller() {
 	if (greenFlag) {
 		if (greenlight_t == -1) {
 			greenlight_t = current;
+			randDuration = rand() % (maxTime - minTime + 1) + minTime;
 		}
-		if (difftime(current, greenlight_t) >= 5) {
+		if (difftime(current, greenlight_t) >= randDuration) {
 			greenFlag = false;
 			orangeFlag = true;
 			greenlight_t = -1;
 			orangelight_t = -1;
 		}
-		cout << "green" << endl;
+		// << "green" << endl;
 	}
 	if (orangeFlag) {
 		if (orangelight_t == -1) {
@@ -871,13 +989,13 @@ void light_controller() {
 			redlight_t = -1;
 			orangelight_t = -1;
 		}
-		cout << "orange" << endl;
+		//cout << "orange" << endl;
 	}
 	if (redFlag) {
 		if (redlight_t == -1) {
 			redlight = current_cl;
 			redlight_t = current;
 		}
-		cout << "Red" << endl;
+		//cout << "Red" << endl;
 	}
 }
