@@ -107,9 +107,6 @@ void Render()
 	else {
 		BlackLight();
 	}
-
-	cout << "ROUND" << endl;
-	cout << rounds << endl;
 	
 	// Draw a light sphere
 	/*glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, SphAmbDiff[0]);
@@ -280,11 +277,7 @@ void Render()
 	
 
 	if (crashFlag) {
-		crash("CRASH!", 0.05f);
-<<<<<<< HEAD
-		//cout << "CRASH!!!" << endl;
-=======
->>>>>>> 78dc154d688bc3a57257bbb5d750c6ae7ff86f88
+
 		if (crashTime < 0) {
 			rounds++;
 			crashTime = current;
@@ -309,19 +302,26 @@ void Render()
 			userCarM.rotx = 270.0;
 			userCarM.roty = 180;
 			userCarM.origRot = 180;
-
+		
 		}
-<<<<<<< HEAD
-		crash("CRASH!", 0.05f);
-		cout << difftime(current, crashTime) << endl;
-=======
->>>>>>> 78dc154d688bc3a57257bbb5d750c6ae7ff86f88
+		if (rounds < 3) {
+			crash("CRASH!", 0.05f, -10.5);
+		}
+		else
+			crash("GAME OVER!", 0.05f, -20);
+
 		if (difftime(current, crashTime) >= 3) {
 			crashFlag = false;
 			crashTime = -1;
 			startingState = true;
 			//compCarM.acc = v_start;
 			//userCarM.acc = v_start;
+			if (rounds == 3) {
+				glDeleteLists(compCarId, 1);
+				glDeleteLists(userCarId, 1);
+				glDeleteLists(lightId, 1);
+				exit(0);
+			}
 		}
 	}
 	
@@ -950,7 +950,7 @@ void RenderCompCar() {
 }
 
 
-void crash(const char *str, float size)
+void crash(const char *str, float size, float pos)
 {
 	glLoadIdentity();
 	glPushMatrix();
@@ -1005,7 +1005,7 @@ void crash(const char *str, float size)
 	glEnd();
 
 	glPushMatrix();
-	glTranslatef(-10.5, -2.0, 0.0);
+	glTranslatef(pos, -2.0, 0.0);
 	glScalef(size, size, size);
 	glColor3f(1.0, 1.0, 0.0);
 
