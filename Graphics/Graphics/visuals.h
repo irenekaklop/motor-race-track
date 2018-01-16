@@ -112,3 +112,7 @@ void Gatemove(time_t time);
 void light_controller(void);
 
 void BlackLight();
+
+void MenuSelection(int);
+void Restart();
+void Pause();

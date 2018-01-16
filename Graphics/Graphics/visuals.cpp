@@ -33,16 +33,22 @@ float height = -7.5;
 float offset = 2.5;
 
 float dt = 1.0f;
-float acc = 0.1f;
+float acc = 0.2f;
 float v_max = 1.25f;
-float v_start = 0.25f;
+float v_start = 0.4f;
+float tolerance = 3.5;
 float paused_vcomp, paused_vuser;
+int minTime = 1, maxTime = 12;
 
 float move_x = 0.0f, move_y = 0.0f;
 float angle = 0;
 
 time_t current, crashTime, redlight_t, greenlight_t = -1, orangelight_t= -1, pausedlight_t;
 clock_t redlight, current_cl = -1, pausedlight;
+
+float lv1_acc = 0.1f, lv1_v_max = 2.5f, lv1_v_start = 0.2, lv1_tolerance = 5.5, lv1_minTime = 5, lv1_maxTime = 15;
+float lv2_acc = 0.1f, lv2_v_max = 1.25f, lv2_v_start = 0.4f, lv2_tolerance = 3.5f, lv2_minTime = 1, lv2_maxTime = 12;
+float lv3_acc = 0.2f, lv3_v_max = 1.25f, lv3_v_start = 0.7f, lv3_tolerance = 2, lv3_minTime = 1, lv3_maxTime = 5;
 
 // Values that control the material properties.
 
@@ -62,9 +68,6 @@ GLfloat SphSpecular[4] = { 1, 1, 1, 1.0 };
 GLfloat Lt0amb[4] = {0.3, 0.3, 0.3, 1.0};
 GLfloat Lt0diff[4] = {1.0, 1.0, 1.0, 1.0};
 GLfloat Lt0spec[4] = {0, 0, Cz, 1.0};
-
-
-int minTime = 1, maxTime = 15;
 
 using namespace std;
 
@@ -259,29 +262,9 @@ void Render()
 	glPopMatrix();
 	
 
-	//glLoadIdentity();
-	glPushMatrix();
-	glTranslatef(0, 0, 0);
-	glColor3f(0.0, 1.0, 1.0);
-	glPointSize(5);
-	glBegin(GL_POINTS);
-	glVertex3f(C1x, height, Cz);
-	glEnd();
-	glPopMatrix();
-
-	glPushMatrix();
-	glTranslatef(0, 0, 0);
-	glColor3f(0.0, 1.0, 1.0);
-	glPointSize(5);
-	glBegin(GL_POINTS);
-	glVertex3f(C2x, height, Cz);
-	glEnd();
-	glPopMatrix();
-	
-
 	if (crashFlag) {
 		crash("CRASH!", 0.05f);
-		//cout << "CRASH!!!" << endl;
+		cout << "CRASH!!!" << endl;
 		if (crashTime < 0) {
 			crashTime = current;
 
@@ -306,11 +289,11 @@ void Render()
 			userCarM.roty = 180;
 			userCarM.origRot = 180;
 
-			//cout << difftime(crashTime, current) << endl;
+			cout << difftime(crashTime, current) << endl;
 		}
 		//cout << difftime(current, crashTime) << endl;
 		if (crashFlag && difftime(current, crashTime) >= 3) {
-			//cout << "HERE\n";
+			cout << "HERE\n";
 			crashFlag = false;
 			crashTime = -1;
 			startingState = true;
@@ -414,6 +397,7 @@ void Setup()  // TOUCH IT !!
 	userCarM.rotx = 270.0;
 	userCarM.roty = 180;
 	userCarM.origRot = 180;
+
 	
 }
 
@@ -568,14 +552,12 @@ int DisplayCar(model md)
 			- ( md.vertices.at(it->vtx[2] - 1).x - md.vertices.at(it->vtx[1] - 1).x)*(md.vertices.at(it->vtx[1] - 1).y) - md.vertices.at(it->vtx[0] - 1).y);
 		*/
 
-		/*
 		i = ((md.vertices.at(it->vtx[1] - 1).y - md.vertices.at(it->vtx[0] - 1).y)*(md.vertices.at(it->vtx[2] - 1).z - md.vertices.at(it->vtx[0] - 1).z)
 			- (md.vertices.at(it->vtx[2] - 1).y - md.vertices.at(it->vtx[0] - 1).y)*(md.vertices.at(it->vtx[1] - 1).z - md.vertices.at(it->vtx[0] - 1).z));
 		j = -((md.vertices.at(it->vtx[1] - 1).x - md.vertices.at(it->vtx[0] - 1).x)*(md.vertices.at(it->vtx[2] - 1).z - md.vertices.at(it->vtx[0] - 1).z)
 			- (md.vertices.at(it->vtx[2] - 1).x - md.vertices.at(it->vtx[0] - 1).x)*(md.vertices.at(it->vtx[1] - 1).z - md.vertices.at(it->vtx[0] - 1).z));
 		k = ((md.vertices.at(it->vtx[1] - 1).x - md.vertices.at(it->vtx[0] - 1).x)*(md.vertices.at(it->vtx[2] - 1).y - md.vertices.at(it->vtx[0] - 1).y)
-			- (md.vertices.at(it->vtx[2] - 1).x - md.vertices.at(it->vtx[0] - 1).x)*(md.vertices.at(it->vtx[1] - 1).y) - md.vertices.at(it->vtx[0] - 1).y);
-		*/
+			- (md.vertices.at(it->vtx[2] - 1).x - md.vertices.at(it->vtx[0] - 1).x)*(md.vertices.at(it->vtx[1] - 1).y) - md.vertices.at(it->vtx[0] - 1).y);		
 
 		/*
 		i = ((md.vertices.at(it->vtx[0] - 1).y - md.vertices.at(it->vtx[1] - 1).y)*(md.vertices.at(it->vtx[0] - 1).z - md.vertices.at(it->vtx[2] - 1).z)
@@ -586,9 +568,9 @@ int DisplayCar(model md)
 			- (md.vertices.at(it->vtx[0] - 1).x - md.vertices.at(it->vtx[2] - 1).x)*(md.vertices.at(it->vtx[0] - 1).y - md.vertices.at(it->vtx[1] - 1).y));
 		*/
 
-		//float magnitude = sqrtf(powf(i,2)+ powf(j, 2)+ powf(k, 2));
+		float magnitude = sqrtf(powf(i,2)+ powf(j, 2)+ powf(k, 2));
 		
-		//glNormal3f(i/magnitude, j / magnitude, k / magnitude);
+		glNormal3f(i/magnitude, j / magnitude, k / magnitude);
 
 		glVertex3f(md.vertices.at(it->vtx[0] - 1).x, md.vertices.at(it->vtx[0] - 1).y, md.vertices.at(it->vtx[0] - 1).z);
 		glVertex3f(md.vertices.at(it->vtx[1] - 1).x, md.vertices.at(it->vtx[1] - 1).y, md.vertices.at(it->vtx[1] - 1).z);
@@ -662,58 +644,11 @@ void Keyboard(unsigned char key, int x, int y)
 		break;
 	case 'r':
 	case 'R':
-		startingState = true;
-
-		redFlag = false;
-		orangeFlag = false;
-		greenFlag = true;
-
-		move_x = 0.0f;
-		move_y = 0.0f;
-
-		greenlight_t = -1;
-		orangelight_t = -1;
-		redlight_t = -1;
-
-		compCarM.leftFlag = false;
-		compCarM.rightFlag = true;
-		compCarM.firstTime = false;
-		compCarM.tx = -10.0;
-		compCarM.tz = Cz + R2;
-		compCarM.acc = 0;
-		compCarM.rotx = 270.0;
-		compCarM.roty = 180;
-		compCarM.origRot = 180;
-
-		userCarM.leftFlag = false;
-		userCarM.rightFlag = true;
-		userCarM.firstTime = false;
-		userCarM.tx = -10.0;
-		userCarM.tz = Cz + R1;
-		userCarM.acc = 0;
-		userCarM.rotx = 270.0;
-		userCarM.roty = 180;
-		userCarM.origRot = 180;
+		Restart();
 		break;
 	case 'p':
 	case 'P':
-		pausedState = !pausedState;
-		if (pausedState) {
-			pausedlight_t = current;
-			pausedlight = current_cl;
-		}
-		if (!pausedState) {
-			if (greenFlag) {
-				greenlight_t += current - pausedlight_t;
-			}
-			else if (orangeFlag) {
-				orangelight_t += current - pausedlight_t;
-			}
-			else if (redFlag) {
-				redlight_t += current - pausedlight_t;
-				redlight += current_cl - pausedlight;
-			}
-		}
+		Pause();
 		break;
 	case SPACEBAR:
 		if (startingState) {
@@ -874,26 +809,26 @@ void RenderUserCar() {
 		float temp = userCarM.tx;
 		if (temp - userCarM.acc*dt <= -1 && temp + userCarM.acc*dt > C2x && userCarM.tz < Cz && isSet) {
 			if (userCarM.tx != -1) {
-				//cout << "STOPPED\n";
+				cout << "STOPPED\n";
 				isStopped = true;
 				userCarM.acc = 0;
 				userCarM.tx = -1;
 				return;
 			}
-			//cout << "HERE!!!!!!!!!!!!!!!!!~~~~~~~~~~~~~\n";
+			cout << "HERE!!!!!!!!!!!!!!!!!~~~~~~~~~~~~~\n";
 		}
 		if ( temp - userCarM.acc*dt < -1 && temp + userCarM.acc*dt > C2x && userCarM.tz < Cz && !isSet) {
 			crashFlag = true;
 			userCarM.acc = 0;
-			//cout << "CRASH FLAG\n"<<endl;
+			cout << "CRASH FLAG\n"<<endl;
 		}
 		
 	}
 
 	if (isSet) {
-		if (!(userCarM.tx >= -1 && userCarM.tx < 2.5 && userCarM.tz < Cz)) {
+		if (!(userCarM.tx >= -1 && userCarM.tx < tolerance && userCarM.tz < Cz)) {
 			isSet = false;
-			//cout << "not valid\n"<<endl;
+			cout << "not valid\n"<<endl;
 		}
 		if (isStopped && greenFlag) {
 			isSet = false;
@@ -1106,7 +1041,7 @@ void light_controller() {
 			redlight_t = current;
 		}
 		
-		cout << "Red" << endl;
+		//cout << "Red" << endl;
 	}
 	else {
 		glColor3f(0, 0, 0);
@@ -1149,4 +1084,100 @@ void BlackLight() {
 	glTranslatef(-3, 0, Cz - R1 - offset);
 	glutSolidSphere(0.3, 30, 30);
 	glPopMatrix();
+}
+
+
+void MenuSelection(int choice) {
+	switch (choice) {
+	case 0:
+		exit(0);
+		break;
+	case 1:
+		Restart();
+
+		acc = lv1_acc;
+		v_max = lv1_v_max;
+		v_start = lv1_v_start;
+		tolerance  = lv1_tolerance;
+		minTime = lv1_minTime;
+		maxTime = lv1_maxTime;
+		break;
+	case 2:
+		Restart();
+
+		acc = lv2_acc;
+		v_max = lv2_v_max;
+		v_start = lv2_v_start;
+		tolerance = lv2_tolerance;
+		minTime = lv2_minTime;
+		maxTime = lv2_maxTime;
+		break;
+	case 3:
+		Restart();
+
+		acc = lv3_acc;
+		v_max = lv3_v_max;
+		v_start = lv3_v_start;
+		tolerance = lv3_tolerance;
+		minTime = lv3_minTime;
+		maxTime = lv3_maxTime;
+		break;
+	}
+}
+
+
+void Restart() {
+	startingState = true;
+
+	redFlag = false;
+	orangeFlag = false;
+	greenFlag = true;
+
+	move_x = 0.0f;
+	move_y = 0.0f;
+
+	greenlight_t = -1;
+	orangelight_t = -1;
+	redlight_t = -1;
+
+	compCarM.leftFlag = false;
+	compCarM.rightFlag = true;
+	compCarM.firstTime = false;
+	compCarM.tx = -10.0;
+	compCarM.tz = Cz + R2;
+	compCarM.acc = 0;
+	compCarM.rotx = 270.0;
+	compCarM.roty = 180;
+	compCarM.origRot = 180;
+
+	userCarM.leftFlag = false;
+	userCarM.rightFlag = true;
+	userCarM.firstTime = false;
+	userCarM.tx = -10.0;
+	userCarM.tz = Cz + R1;
+	userCarM.acc = 0;
+	userCarM.rotx = 270.0;
+	userCarM.roty = 180;
+	userCarM.origRot = 180;
+}
+
+
+void Pause() {
+	pausedState = !pausedState;
+	if (pausedState) {
+		pausedlight_t = current;
+		pausedlight = current_cl;
+	}
+	if (!pausedState) {
+		if (greenFlag) {
+			greenlight_t += current - pausedlight_t;
+		}
+		else if (orangeFlag) {
+			orangelight_t += current - pausedlight_t;
+		}
+		else if (redFlag) {
+			redlight_t += current - pausedlight_t;
+			redlight += current_cl - pausedlight;
+		}
+	}
 }
