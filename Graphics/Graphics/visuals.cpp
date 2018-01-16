@@ -120,7 +120,6 @@ void Render()
 	
 	//Set position
 
-	//cout << compCarM.tx << endl;
 
 	/* UPPER STRAIGHT TRACK	*/
 
@@ -282,7 +281,10 @@ void Render()
 
 	if (crashFlag) {
 		crash("CRASH!", 0.05f);
+<<<<<<< HEAD
 		//cout << "CRASH!!!" << endl;
+=======
+>>>>>>> 78dc154d688bc3a57257bbb5d750c6ae7ff86f88
 		if (crashTime < 0) {
 			rounds++;
 			crashTime = current;
@@ -308,13 +310,13 @@ void Render()
 			userCarM.roty = 180;
 			userCarM.origRot = 180;
 
-			cout << difftime(crashTime, current) << endl;
 		}
+<<<<<<< HEAD
 		crash("CRASH!", 0.05f);
 		cout << difftime(current, crashTime) << endl;
+=======
+>>>>>>> 78dc154d688bc3a57257bbb5d750c6ae7ff86f88
 		if (difftime(current, crashTime) >= 3) {
-			cout << "HERE\n";
-			cout << difftime(current, crashTime) << "\t" << (difftime(current, crashTime) >= 3)<< "\t" << current << "\t" << crashTime << endl;
 			crashFlag = false;
 			crashTime = -1;
 			startingState = true;
@@ -616,6 +618,10 @@ int DisplayCar(model md)
 
 	glEndList();
 
+	md.vertices.clear();
+	md.normals.clear();
+	md.faces.clear();
+
 	return id;
 }
 
@@ -641,17 +647,23 @@ int DisplayLight(model md) {
 
 	glEndList();
 
+	md.vertices.clear();
+	md.normals.clear();
+	md.faces.clear();
+
 	return id;
 }
 
 
 void Keyboard(unsigned char key, int x, int y)
 {
-	//cout << key << endl;
 	switch (key)
 	{
 	case 'q': 
 	case 'Q':
+		glDeleteLists(compCarId, 1);
+		glDeleteLists(userCarId, 1);
+		glDeleteLists(lightId, 1);
 		exit(0);
 		break;
 	case 'w': 
@@ -697,7 +709,6 @@ void Keyboard(unsigned char key, int x, int y)
 
 
 void Arrows(int key, int x, int y) {
-	//cout << "KEY\n";
 	switch (key) {
 	case GLUT_KEY_PAGE_UP:
 		dt += 0.1f;
@@ -840,18 +851,15 @@ void RenderUserCar() {
 		float temp = userCarM.tx;
 		if (temp - userCarM.acc*dt <= -1 && temp + userCarM.acc*dt > C2x && userCarM.tz < Cz && isSet) {
 			if (userCarM.tx != -1) {
-				cout << "STOPPED\n";
 				isStopped = true;
 				userCarM.acc = 0;
 				userCarM.tx = -1;
 				return;
 			}
-			cout << "HERE!!!!!!!!!!!!!!!!!~~~~~~~~~~~~~\n";
 		}
 		if ( temp - userCarM.acc*dt < -1 && temp + userCarM.acc*dt > C2x && userCarM.tz < Cz && !isSet) {
 			crashFlag = true;
 			userCarM.acc = 0;
-			cout << "CRASH FLAG\n"<<endl;
 		}
 		
 	}
@@ -859,13 +867,11 @@ void RenderUserCar() {
 	if (isSet) {
 		if (!(userCarM.tx >= -1 && userCarM.tx < tolerance && userCarM.tz < Cz)) {
 			isSet = false;
-			cout << "not valid\n"<<endl;
 		}
 		if (isStopped && greenFlag) {
 			isSet = false;
 			isStopped = false;
 			userCarM.acc = v_start;
-			cout << "start again!" << isSet << "\t" << isStopped << "\t" << greenFlag << endl;
 		}
 	}
 
@@ -898,13 +904,11 @@ void RenderUserCar() {
 bool toStop = false;
 void RenderCompCar() {
 	if (redFlag || toStop) {
-		//cout << "in " << redFlag << endl;
 		float temp = compCarM.tx;
 		if (temp - compCarM.acc*dt < -1 && temp + compCarM.acc*dt > C2x && compCarM.tz < Cz) {
 			if (compCarM.tx != -1) {
 				compCarM.tx = -1;
 			}
-			//cout << "HERE!!!!!!!!!!!!!!!!!~~~~~~~~~~~~~\n";
 
 		}
 	}
@@ -917,7 +921,6 @@ void RenderCompCar() {
 			}
 		}
 	}
-	//cout << "out " << redFlag << endl;
 
 	if (compCarM.tx >= C1x) {
 		rightCycle(&compCarM, R2);
@@ -943,7 +946,6 @@ void RenderCompCar() {
 
 		}
 	}
-	//cout << compCarM.tx << "\t" << compCarM.tz << "\t" << compCarM.theta*180/PI << endl;
 
 }
 
@@ -1018,7 +1020,6 @@ void Gatemove(time_t time) {
 	double diffticks = current_cl - redlight;
 	double diffms = (diffticks) / (CLOCKS_PER_SEC / 1000);
 
-	//cout << diffms << endl;
 
 	if (redFlag && diffms*dt <= 2000 ) { //bridge opens
 		float perc = diffms*dt / 2000;
@@ -1087,7 +1088,6 @@ void light_controller() {
 			orangelight_t = -1;
 			glColor3f(0, 0, 0);
 		}
-		//cout << "orange" << endl;
 	}
 	else {
 		glColor3f(0, 0, 0);
@@ -1105,7 +1105,6 @@ void light_controller() {
 			redlight_t = current;
 		}
 		
-		//cout << "Red" << endl;
 	}
 	else {
 		glColor3f(0, 0, 0);
@@ -1154,6 +1153,9 @@ void BlackLight() {
 void MenuSelection(int choice) {
 	switch (choice) {
 	case 0:
+		glDeleteLists(compCarId, 1);
+		glDeleteLists(userCarId, 1);
+		glDeleteLists(lightId, 1);	
 		exit(0);
 		break;
 	case 1:
@@ -1207,6 +1209,8 @@ void Restart() {
 	greenlight_t = -1;
 	orangelight_t = -1;
 	redlight_t = -1;
+	crashTime = -1;
+	crashFlag = false;
 
 	compCarM.leftFlag = false;
 	compCarM.rightFlag = true;
