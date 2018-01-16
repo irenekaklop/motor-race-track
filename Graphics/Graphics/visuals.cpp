@@ -37,18 +37,19 @@ float acc = 0.2f;
 float v_max = 1.25f;
 float v_start = 0.4f;
 float tolerance = 3.5;
+float pass = 23.2;
 float paused_vcomp, paused_vuser;
 int minTime = 1, maxTime = 12;
 
 float move_x = 0.0f, move_y = 0.0f;
 float angle = 0;
 
-time_t current, crashTime, redlight_t, greenlight_t = -1, orangelight_t= -1, pausedlight_t;
+time_t current, crashTime = -1, redlight_t, greenlight_t = -1, orangelight_t= -1, pausedlight_t;
 clock_t redlight, current_cl = -1, pausedlight;
 
-float lv1_acc = 0.1f, lv1_v_max = 2.5f, lv1_v_start = 0.2, lv1_tolerance = 5.5, lv1_minTime = 5, lv1_maxTime = 15;
-float lv2_acc = 0.1f, lv2_v_max = 1.25f, lv2_v_start = 0.4f, lv2_tolerance = 3.5f, lv2_minTime = 1, lv2_maxTime = 12;
-float lv3_acc = 0.2f, lv3_v_max = 1.25f, lv3_v_start = 0.7f, lv3_tolerance = 2, lv3_minTime = 1, lv3_maxTime = 5;
+float lv1_acc = 0.1f, lv1_v_max = 2.5f, lv1_v_start = 0.2, lv1_tolerance = 5.5, lv1_minTime = 5, lv1_maxTime = 15, lv1_pass = 11.6;
+float lv2_acc = 0.1f, lv2_v_max = 1.25f, lv2_v_start = 0.4f, lv2_tolerance = 3.5f, lv2_minTime = 1, lv2_maxTime = 12, lv2_pass = 23.2;
+float lv3_acc = 0.2f, lv3_v_max = 1.25f, lv3_v_start = 0.7f, lv3_tolerance = 2, lv3_minTime = 1, lv3_maxTime = 5, lv3_pass = 40.6;
 
 // Values that control the material properties.
 
@@ -89,6 +90,7 @@ void Render()
 
 	/*Light*/
 	//glLoadIdentity();
+
 
 	glPushMatrix();
 	glTranslatef(-3, height, Cz - R1 - offset - 2);
@@ -135,10 +137,19 @@ void Render()
 	
 	glColor3f(0.0, 0.0, 1.0);											//make the colour blue (lower)
 	glBegin(GL_QUADS);
+	/*
 	glVertex3f(C1x, height, Cz + R2 - offset);
 	glVertex3f(C1x, height, Cz + R1 + offset);
 	glVertex3f(C2x, height, Cz + R1 + offset);
 	glVertex3f(C2x, height, Cz + R2 - offset);
+	*/
+
+	glVertex3f(C2x, height, Cz + R2 - offset);
+	glVertex3f(C2x, height, Cz + R1 + offset);
+	glVertex3f(C1x, height, Cz + R1 + offset);
+	glVertex3f(C1x, height, Cz + R2 - offset);
+
+
 	glEnd();
 	
 	/*WHITE BOXES at down straight track*/
@@ -191,6 +202,8 @@ void Render()
 	//glLoadIdentity();
 
 	glTranslatef(C1x, height, Cz);
+	glRotatef(-180.0, 0, 0, 1);
+	glRotatef(180, 0, 1, 0);
 	glRotatef(90, 90, 0, 0);
 	GLUquadric* quad;
 	quad = gluNewQuadric();
@@ -291,9 +304,10 @@ void Render()
 
 			cout << difftime(crashTime, current) << endl;
 		}
-		//cout << difftime(current, crashTime) << endl;
-		if (crashFlag && difftime(current, crashTime) >= 3) {
+		cout << difftime(current, crashTime) << endl;
+		if (difftime(current, crashTime) >= 3) {
 			cout << "HERE\n";
+			cout << difftime(current, crashTime) << "\t" << (difftime(current, crashTime) >= 3)<< "\t" << current << "\t" << crashTime << endl;
 			crashFlag = false;
 			crashTime = -1;
 			startingState = true;
@@ -398,6 +412,9 @@ void Setup()  // TOUCH IT !!
 	userCarM.roty = 180;
 	userCarM.origRot = 180;
 
+	
+	glEnable(GL_CULL_FACE);
+	glFrontFace(GL_CCW);
 	
 }
 
@@ -543,6 +560,15 @@ int DisplayCar(model md)
 			- (md.vertices.at(it->vtx[1] - 1).x - md.vertices.at(it->vtx[2] - 1).x)*(md.vertices.at(it->vtx[0] - 1).y - md.vertices.at(it->vtx[1] - 1).y));
 		*/
 
+		
+		i = ((md.vertices.at(it->vtx[2] - 1).y - md.vertices.at(it->vtx[1] - 1).y)*(md.vertices.at(it->vtx[1] - 1).z - md.vertices.at(it->vtx[0] - 1).z)
+		- (md.vertices.at(it->vtx[1] - 1).y - md.vertices.at(it->vtx[0] - 1).y)*(md.vertices.at(it->vtx[2] - 1).z - md.vertices.at(it->vtx[1] - 1).z));
+		j = -((md.vertices.at(it->vtx[2] - 1).x - md.vertices.at(it->vtx[1] - 1).x)*(md.vertices.at(it->vtx[1] - 1).z - md.vertices.at(it->vtx[0] - 1).z)
+		- (md.vertices.at(it->vtx[1] - 1).x - md.vertices.at(it->vtx[0] - 1).x)*(md.vertices.at(it->vtx[2] - 1).z - md.vertices.at(it->vtx[1] - 1).z));
+		k = ((md.vertices.at(it->vtx[2] - 1).x - md.vertices.at(it->vtx[1] - 1).x)*(md.vertices.at(it->vtx[1] - 1).y - md.vertices.at(it->vtx[0] - 1).y)
+		- (md.vertices.at(it->vtx[1] - 1).x - md.vertices.at(it->vtx[0] - 1).x)*(md.vertices.at(it->vtx[2] - 1).y - md.vertices.at(it->vtx[1] - 1).y));
+		
+
 		/*
 		i = ((md.vertices.at(it->vtx[1] - 1).y - md.vertices.at(it->vtx[0] - 1).y)*(md.vertices.at(it->vtx[2] - 1).z - md.vertices.at(it->vtx[1] - 1).z)
 			- (md.vertices.at(it->vtx[2] - 1).y - md.vertices.at(it->vtx[1] - 1).y)*(md.vertices.at(it->vtx[1] - 1).z - md.vertices.at(it->vtx[0] - 1).z));
@@ -552,12 +578,14 @@ int DisplayCar(model md)
 			- ( md.vertices.at(it->vtx[2] - 1).x - md.vertices.at(it->vtx[1] - 1).x)*(md.vertices.at(it->vtx[1] - 1).y) - md.vertices.at(it->vtx[0] - 1).y);
 		*/
 
+		/*
 		i = ((md.vertices.at(it->vtx[1] - 1).y - md.vertices.at(it->vtx[0] - 1).y)*(md.vertices.at(it->vtx[2] - 1).z - md.vertices.at(it->vtx[0] - 1).z)
 			- (md.vertices.at(it->vtx[2] - 1).y - md.vertices.at(it->vtx[0] - 1).y)*(md.vertices.at(it->vtx[1] - 1).z - md.vertices.at(it->vtx[0] - 1).z));
 		j = -((md.vertices.at(it->vtx[1] - 1).x - md.vertices.at(it->vtx[0] - 1).x)*(md.vertices.at(it->vtx[2] - 1).z - md.vertices.at(it->vtx[0] - 1).z)
 			- (md.vertices.at(it->vtx[2] - 1).x - md.vertices.at(it->vtx[0] - 1).x)*(md.vertices.at(it->vtx[1] - 1).z - md.vertices.at(it->vtx[0] - 1).z));
 		k = ((md.vertices.at(it->vtx[1] - 1).x - md.vertices.at(it->vtx[0] - 1).x)*(md.vertices.at(it->vtx[2] - 1).y - md.vertices.at(it->vtx[0] - 1).y)
 			- (md.vertices.at(it->vtx[2] - 1).x - md.vertices.at(it->vtx[0] - 1).x)*(md.vertices.at(it->vtx[1] - 1).y) - md.vertices.at(it->vtx[0] - 1).y);		
+		*/
 
 		/*
 		i = ((md.vertices.at(it->vtx[0] - 1).y - md.vertices.at(it->vtx[1] - 1).y)*(md.vertices.at(it->vtx[0] - 1).z - md.vertices.at(it->vtx[2] - 1).z)
@@ -637,10 +665,6 @@ void Keyboard(unsigned char key, int x, int y)
 			glutReshapeWindow(960, 480);
 			glutPositionWindow(50, 50);
 		}
-		break;
-	case 'c':
-	case 'C':
-		crashFlag = !crashFlag;
 		break;
 	case 'r':
 	case 'R':
@@ -864,8 +888,9 @@ void RenderUserCar() {
 	}
 }
 
+bool toStop = false;
 void RenderCompCar() {
-	if (redFlag) {
+	if (redFlag || toStop) {
 		//cout << "in " << redFlag << endl;
 		float temp = compCarM.tx;
 		if (temp - compCarM.acc*dt < -1 && temp + compCarM.acc*dt > C2x && compCarM.tz < Cz) {
@@ -874,6 +899,15 @@ void RenderCompCar() {
 			}
 			//cout << "HERE!!!!!!!!!!!!!!!!!~~~~~~~~~~~~~\n";
 
+		}
+	}
+
+	if (orangeFlag) {
+		if (compCarM.tz <= Cz - R2 && compCarM.tx > -1) {
+			float timeleft = 2 - difftime(current, orangelight_t);
+			if (timeleft >= 0 && timeleft*pass > C2x - 5) {
+				toStop = true;
+			}
 		}
 	}
 	//cout << "out " << redFlag << endl;
@@ -918,6 +952,7 @@ void crash(const char *str, float size)
 
 
 	glColor3f(1.0, 0.0, 0.0);
+	/*
 	glVertex2f(-7.04769, -2.56515);
 	glVertex2f(-15.0, 0);
 	glVertex2f(-7.04769, 2.56515);
@@ -936,7 +971,28 @@ void crash(const char *str, float size)
 	glVertex2f(-2.604722, -14.772116);
 	glVertex2f(-3.75, -6.49519);
 	glVertex2f(-11.265462, -10.26056);
+	*/
 
+	glVertex2f(-7.04769, -2.56515);
+	glVertex2f(-11.265462, -10.26056);
+	glVertex2f(-3.75, -6.49519);
+	glVertex2f(-2.604722, -14.772116);
+	glVertex2f(1.30236, -7.38606);
+	glVertex2f(7.5, -12.990381);
+	glVertex2f(5.74533, -4.82091);
+	glVertex2f(14.095389, -5.459553);
+	glVertex2f(7.5, 0);
+	glVertex2f(14.095389, 5.459553);
+	glVertex2f(5.74533, 4.82091);
+	glVertex2f(7.5, 12.990381);
+	glVertex2f(1.30236, 7.38606);
+	glVertex2f(-2.604722, 14.772116);
+	glVertex2f(-3.75, 6.49519);
+	glVertex2f(-11.265462, 10.26056);
+	glVertex2f(-7.04769, 2.56515);
+	glVertex2f(-15.0, 0);
+
+	
 	glEnd();
 
 	glPushMatrix();
@@ -966,6 +1022,7 @@ void Gatemove(time_t time) {
 	
 	if (redFlag && diffms*dt >= 4000) {
 		redFlag = false;
+		toStop = false;
 		greenFlag = true;
 		move_x = 0;
 		move_y = 0;
@@ -1101,6 +1158,7 @@ void MenuSelection(int choice) {
 		tolerance  = lv1_tolerance;
 		minTime = lv1_minTime;
 		maxTime = lv1_maxTime;
+		pass = lv1_pass;
 		break;
 	case 2:
 		Restart();
@@ -1111,6 +1169,7 @@ void MenuSelection(int choice) {
 		tolerance = lv2_tolerance;
 		minTime = lv2_minTime;
 		maxTime = lv2_maxTime;
+		pass = lv2_pass;
 		break;
 	case 3:
 		Restart();
@@ -1121,6 +1180,7 @@ void MenuSelection(int choice) {
 		tolerance = lv3_tolerance;
 		minTime = lv3_minTime;
 		maxTime = lv3_maxTime;
+		pass = lv3_pass;
 		break;
 	}
 }
