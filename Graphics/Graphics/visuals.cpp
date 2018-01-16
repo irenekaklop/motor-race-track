@@ -84,8 +84,21 @@ void Render()
 	current = time(NULL);
 	current_cl = clock();
 
+	/*Light*/
+	//glLoadIdentity();
+
+	glPushMatrix();
+	glTranslatef(-3, height, Cz - R1 - offset - 2);
+	glScalef(0.25f, 0.25f, 0.25f);
+	glColor3f(0.749020, 0.749020, 0.749020);                            // Set drawing colour
+	glCallList(lightId);
+	glPopMatrix();
+
 	if (!startingState && !pausedState) {
 		light_controller();
+	}
+	else {
+		BlackLight();
 	}
 	
 	// Draw a light sphere
@@ -94,26 +107,12 @@ void Render()
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, SphShininess);*/
 	//glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, SphShininess);
 	//glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, SphSpecular);
-	glPushMatrix();
-	glTranslatef(0, 0, Cz);
-	glColor3f(0, 1, 0);
-	glutSolidSphere(1, 25, 25);
-	glPopMatrix();
-
+	
 	//Set position
 
 	//cout << compCarM.tx << endl;
 
-	//Track
-
-	/* UPPER STRAIGHT TRACK
-	(20, )(Α)			(D)(-50, 25)
-	(200,-25)(Β)			(C)(-50,-25)
-
-	second part
-	(-200, 25)	(-150, 25)
-	(-200, -25)	(-150, -25)
-	*/
+	/* UPPER STRAIGHT TRACK	*/
 
 	glPushMatrix();
 	glColor3f(0.0, 0.0, 1.0);											//make the colour blue (lower)
@@ -260,15 +259,6 @@ void Render()
 	glPopMatrix();
 	
 
-
-	/*Light*/
-	//glLoadIdentity();
-	glTranslatef(-3, height, Cz-R1-offset-2);
-	glScalef(0.25f, 0.25f, 0.25f);
-	glColor3f(0.749020, 0.749020, 0.749020);                            // Set drawing colour
-	glCallList(lightId);
-
-
 	//glLoadIdentity();
 	glPushMatrix();
 	glTranslatef(0, 0, 0);
@@ -291,7 +281,7 @@ void Render()
 
 	if (crashFlag) {
 		crash("CRASH!", 0.05f);
-		cout << "CRASH!!!" << endl;
+		//cout << "CRASH!!!" << endl;
 		if (crashTime < 0) {
 			crashTime = current;
 
@@ -825,7 +815,6 @@ void rightCycle(carMovement* car, float R) {
 		car->tz = Cz - R;
 		car->roty = 0;
 	}
-
 }
 
 
@@ -835,8 +824,8 @@ void leftCycle(carMovement *car, float R) {
 		return;
 	}
 
-
 	if (!car->firstTime) {
+
 		car->firstTime = true;
 		car->origTx = C2x;
 		car->origTz = Cz;
@@ -883,20 +872,20 @@ bool isStopped = false;
 void RenderUserCar() {
 	if (redFlag) {
 		float temp = userCarM.tx;
-		if (isSet && temp - userCarM.acc*dt <= -1 && temp + userCarM.acc*dt > C2x && userCarM.tz < Cz) {
+		if (temp - userCarM.acc*dt <= -1 && temp + userCarM.acc*dt > C2x && userCarM.tz < Cz && isSet) {
 			if (userCarM.tx != -1) {
-				cout << "STOPPED\n";
+				//cout << "STOPPED\n";
 				isStopped = true;
 				userCarM.acc = 0;
 				userCarM.tx = -1;
 				return;
 			}
-			cout << "HERE!!!!!!!!!!!!!!!!!~~~~~~~~~~~~~\n";
+			//cout << "HERE!!!!!!!!!!!!!!!!!~~~~~~~~~~~~~\n";
 		}
-		if (!isSet && temp - userCarM.acc*dt < -1 && temp + userCarM.acc*dt > C2x && userCarM.tz < Cz) {
+		if ( temp - userCarM.acc*dt < -1 && temp + userCarM.acc*dt > C2x && userCarM.tz < Cz && !isSet) {
 			crashFlag = true;
 			userCarM.acc = 0;
-			cout << "CRASH FLAG\n";
+			//cout << "CRASH FLAG\n"<<endl;
 		}
 		
 	}
@@ -904,7 +893,7 @@ void RenderUserCar() {
 	if (isSet) {
 		if (!(userCarM.tx >= -1 && userCarM.tx < 2.5 && userCarM.tz < Cz)) {
 			isSet = false;
-			cout << "not valid\n";
+			//cout << "not valid\n"<<endl;
 		}
 		if (isStopped && greenFlag) {
 			isSet = false;
@@ -1062,7 +1051,9 @@ void Gatemove(time_t time) {
 
 time_t randDuration;
 void light_controller() {
+	glPushMatrix();
 	if (greenFlag) {
+		glColor3f(0, 1, 0);
 		if (greenlight_t == -1) {
 			greenlight_t = current;
 			randDuration = rand() % (maxTime - minTime + 1) + minTime;
@@ -1072,10 +1063,21 @@ void light_controller() {
 			orangeFlag = true;
 			greenlight_t = -1;
 			orangelight_t = -1;
+			glColor3f(0, 0, 0);
 		}
 		// << "green" << endl;
 	}
+	else {
+		glColor3f(0, 0, 0);
+	}
+	//Green sphere
+	glTranslatef(-3, 0, Cz-R1-offset);
+	glutSolidSphere(0.3, 25, 25);
+	glPopMatrix();
+
+	glPushMatrix();
 	if (orangeFlag) {
+		glColor3f(1, 0.68, 0);
 		if (orangelight_t == -1) {
 			orangelight_t = current;
 		}
@@ -1084,14 +1086,67 @@ void light_controller() {
 			redFlag = true;
 			redlight_t = -1;
 			orangelight_t = -1;
+			glColor3f(0, 0, 0);
 		}
 		//cout << "orange" << endl;
 	}
+	else {
+		glColor3f(0, 0, 0);
+	}
+	//Orange sphere
+	glTranslatef(-3, 1, Cz - R1 - offset);
+	glutSolidSphere(0.3, 25, 25);
+	glPopMatrix();
+
+	glPushMatrix();
 	if (redFlag) {
+		glColor3f(1, 0, 0);
 		if (redlight_t == -1) {
 			redlight = current_cl;
 			redlight_t = current;
 		}
-		//cout << "Red" << endl;
+		
+		cout << "Red" << endl;
 	}
+	else {
+		glColor3f(0, 0, 0);
+	}
+	glTranslatef(-3, 2, Cz - R1 - offset);
+	glutSolidSphere(0.3, 30, 30);
+	glPopMatrix();
+}
+
+void BlackLight() {
+	if (redFlag) {
+		glColor3f(1, 0, 0);
+	}
+	else {
+		glColor3f(0, 0, 0);
+	}
+	glPushMatrix();
+	glTranslatef(-3, 2, Cz - R1 - offset);
+	glutSolidSphere(0.3, 30, 30);
+	glPopMatrix();
+	//Orange
+	if (orangeFlag) {
+		glColor3f(1, 0.68, 0);
+	}
+	else {
+		glColor3f(0, 0, 0);
+	}
+	glPushMatrix();
+	glTranslatef(-3, 1, Cz - R1 - offset);
+	glutSolidSphere(0.3, 30, 30);
+	glPopMatrix();
+	//Green
+	if (greenFlag) {
+		glColor3f(0, 1, 0);
+	}
+	else {
+		glColor3f(0, 0, 0);
+	}
+	glPushMatrix();
+	glTranslatef(-3, 0, Cz - R1 - offset);
+	glutSolidSphere(0.3, 30, 30);
+	glPopMatrix();
 }

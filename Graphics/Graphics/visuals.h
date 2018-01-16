@@ -11,7 +11,7 @@
 #include "gl/glut.h"   // - An interface and windows management library
 
 
-#define PI 3.14159265
+#define PI 3.1415926535897932384626433832795
 #define M_PI 3.1415926535897932384626433832795
 #define SPACEBAR 32
 
@@ -110,3 +110,5 @@ void Track(int x, int y, int z);
 static void torus(float inner, float outer, unsigned int pts);
 void Gatemove(time_t time);
 void light_controller(void);
+
+void BlackLight();
