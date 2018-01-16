@@ -12,6 +12,9 @@ int lightId;
 carMovement compCarM;
 carMovement userCarM;
 
+bool startingState = true;
+bool pausedState = false;
+
 bool fullscreen = false;
 
 bool crashFlag = false;
@@ -29,14 +32,17 @@ float Cz = -60;
 float height = -7.5;
 float offset = 2.5;
 
+float dt = 1.0f;
 float acc = 0.1f;
 float v_max = 1.25f;
+float v_start = 0.25f;
+float paused_vcomp, paused_vuser;
 
 float move_x = 0.0f, move_y = 0.0f;
 float angle = 0;
 
-time_t current, crashTime, redlight_t, greenlight_t, orangelight_t= -1;
-clock_t redlight, current_cl = -1;
+time_t current, crashTime, redlight_t, greenlight_t = -1, orangelight_t= -1, pausedlight_t;
+clock_t redlight, current_cl = -1, pausedlight;
 
 int minTime = 1, maxTime = 15;
 
@@ -53,10 +59,12 @@ void Render()
 	
 	current = time(NULL);
 	current_cl = clock();
-	light_controller();
+	if (!startingState && !pausedState) {
+		light_controller();
+	}
 	//Set position
 
-	cout << compCarM.tx << endl;
+	//cout << compCarM.tx << endl;
 
 	//Track
 
@@ -176,7 +184,7 @@ void Render()
 	glVertex3f(C2x + move_x, height + move_y, Cz - R2 + offset);
 	glEnd();
 
-	if (redFlag) {
+	if (redFlag && !pausedState) {
 		Gatemove(redlight);
 	}
 
@@ -194,7 +202,9 @@ void Render()
 
 	glCallList(userCarId);
 	
-	RenderUserCar();
+	if (!pausedState) {
+		RenderUserCar();
+	}
 
 	glPopMatrix();
 
@@ -208,7 +218,9 @@ void Render()
 	//DisplayCar(compCar);
 	glCallList(compCarId);
 
-	RenderCompCar();
+	if (!pausedState) {
+		RenderCompCar();
+	}
 
 	glPopMatrix();
 	
@@ -244,9 +256,10 @@ void Render()
 
 	if (crashFlag) {
 		crash("CRASH!", 0.05f);
+		cout << "CRASH!!!" << endl;
 		if (crashTime < 0) {
 			crashTime = current;
-			
+
 			compCarM.acc = 0;
 			userCarM.acc = 0;
 
@@ -275,8 +288,9 @@ void Render()
 			//cout << "HERE\n";
 			crashFlag = false;
 			crashTime = -1;
-			compCarM.acc = 0.25;
-			userCarM.acc = 0.25;
+			startingState = true;
+			//compCarM.acc = v_start;
+			//userCarM.acc = v_start;
 		}
 	}
 	
@@ -384,7 +398,7 @@ void Setup()  // TOUCH IT !!
 	compCarM.firstTime = false;
 	compCarM.tx = -10.0;
 	compCarM.tz = Cz + R2;
-	compCarM.acc = 0.25;
+	compCarM.acc = 0.0f;
 	compCarM.rotx = 270.0;
 	compCarM.roty = 180;
 	compCarM.origRot = 180;
@@ -394,7 +408,7 @@ void Setup()  // TOUCH IT !!
 	userCarM.firstTime = false;
 	userCarM.tx = -10.0;
 	userCarM.tz = Cz + R1;
-	userCarM.acc = 0.25;
+	userCarM.acc = 0.0f;
 	userCarM.rotx = 270.0;
 	userCarM.roty = 180;
 	userCarM.origRot = 180;
@@ -623,11 +637,11 @@ void Keyboard(unsigned char key, int x, int y)
 		break;
 	case 'w': 
 	case 'W':
-		Up();
+		if(!startingState && !pausedState) Up();
 		break;
 	case 's': 
 	case 'S':
-		Down();
+		if (!startingState && !pausedState) Down();
 		break;
 	case 'f':
 	case 'F':
@@ -646,8 +660,65 @@ void Keyboard(unsigned char key, int x, int y)
 		break;
 	case 'r':
 	case 'R':
-		redFlag = !redFlag;
-		greenFlag = !greenFlag;
+		startingState = true;
+
+		redFlag = false;
+		orangeFlag = false;
+		greenFlag = true;
+
+		move_x = 0.0f;
+		move_y = 0.0f;
+
+		greenlight_t = -1;
+		orangelight_t = -1;
+		redlight_t = -1;
+
+		compCarM.leftFlag = false;
+		compCarM.rightFlag = true;
+		compCarM.firstTime = false;
+		compCarM.tx = -10.0;
+		compCarM.tz = Cz + R2;
+		compCarM.acc = 0;
+		compCarM.rotx = 270.0;
+		compCarM.roty = 180;
+		compCarM.origRot = 180;
+
+		userCarM.leftFlag = false;
+		userCarM.rightFlag = true;
+		userCarM.firstTime = false;
+		userCarM.tx = -10.0;
+		userCarM.tz = Cz + R1;
+		userCarM.acc = 0;
+		userCarM.rotx = 270.0;
+		userCarM.roty = 180;
+		userCarM.origRot = 180;
+		break;
+	case 'p':
+	case 'P':
+		pausedState = !pausedState;
+		if (pausedState) {
+			pausedlight_t = current;
+			pausedlight = current_cl;
+		}
+		if (!pausedState) {
+			if (greenFlag) {
+				greenlight_t += current - pausedlight_t;
+			}
+			else if (orangeFlag) {
+				orangelight_t += current - pausedlight_t;
+			}
+			else if (redFlag) {
+				redlight_t += current - pausedlight_t;
+				redlight += current_cl - pausedlight;
+			}
+		}
+		break;
+	case SPACEBAR:
+		if (startingState) {
+			compCarM.acc = v_start;
+			userCarM.acc = v_start;
+			startingState = false;
+		}
 		break;
 	default: break;
 	}
@@ -660,11 +731,17 @@ void Keyboard(unsigned char key, int x, int y)
 void Arrows(int key, int x, int y) {
 	//cout << "KEY\n";
 	switch (key) {
+	case GLUT_KEY_PAGE_UP:
+		dt += 0.1f;
+		break;
+	case GLUT_KEY_PAGE_DOWN:
+		if(dt > 0.1f) dt -= 0.1f;
+		break;
 	case GLUT_KEY_UP:
-		Up();
+		if (!startingState && !pausedState) Up();
 		break;
 	case GLUT_KEY_DOWN:
-		Down();
+		if (!startingState && !pausedState) Down();
 		break;
 	default:
 		break;
@@ -700,12 +777,12 @@ void rightCycle(carMovement* car, float R) {
 		}
 		else{
 			car->omega = car->acc / R;
-			car->theta = car->omega;
+			car->theta = car->omega*dt;
 		}
 	}
 	else {
 		car->omega = car->acc / R;
-		car->theta += car->omega;
+		car->theta += car->omega*dt;
 	}
 
 	car->tx = car->origTx + (R * sin(car->theta));
@@ -757,12 +834,12 @@ void leftCycle(carMovement *car, float R) {
 		}
 		else {
 			car->omega = car->acc / R;
-			car->theta = car->omega;
+			car->theta = car->omega*dt;
 		}
 	}
 	else{
 		car->omega = car->acc / R;
-		car->theta += car->omega;
+		car->theta += car->omega*dt;
 	}
 
 	if (!car->rightFlag && car->theta > PI/2) {
@@ -794,28 +871,34 @@ bool isStopped = false;
 void RenderUserCar() {
 	if (redFlag) {
 		float temp = userCarM.tx;
-		if (isSet && temp - userCarM.acc <= -1 && temp + userCarM.acc > C2x && userCarM.tz < Cz) {
+		if (isSet && temp - userCarM.acc*dt <= -1 && temp + userCarM.acc*dt > C2x && userCarM.tz < Cz) {
 			if (userCarM.tx != -1) {
+				cout << "STOPPED\n";
 				isStopped = true;
 				userCarM.acc = 0;
 				userCarM.tx = -1;
 				return;
 			}
-			//cout << "HERE!!!!!!!!!!!!!!!!!~~~~~~~~~~~~~\n";
+			cout << "HERE!!!!!!!!!!!!!!!!!~~~~~~~~~~~~~\n";
 		}
-		if (!isSet && temp - userCarM.acc < -1 && temp + userCarM.acc > C2x && userCarM.tz < Cz) {
+		if (!isSet && temp - userCarM.acc*dt < -1 && temp + userCarM.acc*dt > C2x && userCarM.tz < Cz) {
 			crashFlag = true;
 			userCarM.acc = 0;
+			cout << "CRASH FLAG\n";
 		}
 		
 	}
 
 	if (isSet) {
-		if (!(userCarM.tx >= -1 && userCarM.tx < 2.5 && userCarM.tz < Cz)) isSet = false;
+		if (!(userCarM.tx >= -1 && userCarM.tx < 2.5 && userCarM.tz < Cz)) {
+			isSet = false;
+			cout << "not valid\n";
+		}
 		if (isStopped && greenFlag) {
 			isSet = false;
 			isStopped = false;
-			userCarM.acc = compCarM.acc;
+			userCarM.acc = v_start;
+			cout << "start again!" << isSet << "\t" << isStopped << "\t" << greenFlag << endl;
 		}
 	}
 
@@ -830,13 +913,13 @@ void RenderUserCar() {
 			userCarM.firstTime = false;
 		}
 		if (userCarM.rightFlag) {
-			userCarM.tx += userCarM.acc;
+			userCarM.tx += userCarM.acc*dt;
 			if (userCarM.tx > C1x) {
 				rightCycle(&userCarM, R1);
 			}
 		}
 		if (userCarM.leftFlag) {
-			userCarM.tx -= userCarM.acc;
+			userCarM.tx -= userCarM.acc*dt;
 			if (userCarM.tx < C2x) {
 				leftCycle(&userCarM, R1);
 			}
@@ -849,7 +932,7 @@ void RenderCompCar() {
 	if (redFlag) {
 		//cout << "in " << redFlag << endl;
 		float temp = compCarM.tx;
-		if (temp - compCarM.acc < -1 && temp + compCarM.acc > C2x && compCarM.tz < Cz) {
+		if (temp - compCarM.acc*dt < -1 && temp + compCarM.acc*dt > C2x && compCarM.tz < Cz) {
 			if (compCarM.tx != -1) {
 				compCarM.tx = -1;
 			}
@@ -870,28 +953,29 @@ void RenderCompCar() {
 			compCarM.firstTime = false;
 		}
 		if (compCarM.rightFlag) {
-			compCarM.tx += compCarM.acc;
+			compCarM.tx += compCarM.acc*dt;
 			if (compCarM.tx > C1x) {
 				rightCycle(&compCarM, R2);
 			}
 		}
 		if (compCarM.leftFlag) {
-			compCarM.tx -= compCarM.acc;
+			compCarM.tx -= compCarM.acc*dt;
 			if (compCarM.tx < C2x) {
 				leftCycle(&compCarM, R2);
 			}
 
 		}
 	}
-	cout << compCarM.tx << "\t" << compCarM.tz << "\t" << compCarM.theta*180/PI << endl;
+	//cout << compCarM.tx << "\t" << compCarM.tz << "\t" << compCarM.theta*180/PI << endl;
 
 }
 
 
 void crash(const char *str, float size)
 {
+	glLoadIdentity();
 	glPushMatrix();
-	glTranslatef(0, 25, -75);
+	glTranslatef(0, 0, -75);
 	glPointSize(5);
 	glBegin(GL_POLYGON);
 
@@ -927,7 +1011,7 @@ void crash(const char *str, float size)
 	for (int i = 0; i<strlen(str); i++)
 		glutStrokeCharacter(GLUT_STROKE_ROMAN, str[i]);
 	glPopMatrix();
-
+	glPopMatrix();
 }
 
 void Gatemove(time_t time) {
@@ -937,14 +1021,14 @@ void Gatemove(time_t time) {
 
 	//cout << diffms << endl;
 
-	if (redFlag && diffms <= 2000 ) { //bridge opens
-		float perc = diffms / 2000;
+	if (redFlag && diffms*dt <= 2000 ) { //bridge opens
+		float perc = diffms*dt / 2000;
 		angle = perc * (PI / 6);
 		move_x = 7.5 - 7.5 * cos(angle);
 		move_y = 7.5 * sin(angle);
 	}
 	
-	if (redFlag && diffms >= 4000) {
+	if (redFlag && diffms*dt >= 4000) {
 		redFlag = false;
 		greenFlag = true;
 		move_x = 0;
@@ -955,8 +1039,8 @@ void Gatemove(time_t time) {
 		redlight_t = -1;
 	}
 
-	if (redFlag && diffms > 2000 && diffms < 4000) { //bridge closes
-		float perc = (2000+(2000-diffms)) / 2000;
+	if (redFlag && diffms*dt > 2000 && diffms*dt < 4000) { //bridge closes
+		float perc = (2000+(2000-diffms*dt)) / 2000;
 		angle = perc * (PI / 6);
 		move_x = 7.5 - 7.5 * cos(angle);
 		move_y = 7.5 * sin(angle);
@@ -971,7 +1055,7 @@ void light_controller() {
 			greenlight_t = current;
 			randDuration = rand() % (maxTime - minTime + 1) + minTime;
 		}
-		if (difftime(current, greenlight_t) >= randDuration) {
+		if (difftime(current, greenlight_t)*dt >= randDuration) {
 			greenFlag = false;
 			orangeFlag = true;
 			greenlight_t = -1;
@@ -983,7 +1067,7 @@ void light_controller() {
 		if (orangelight_t == -1) {
 			orangelight_t = current;
 		}
-		if (difftime(current, orangelight_t) >= 2) {
+		if (difftime(current, orangelight_t)*dt >= 2) {
 			orangeFlag = false;
 			redFlag = true;
 			redlight_t = -1;
