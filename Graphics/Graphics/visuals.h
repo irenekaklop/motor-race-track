@@ -103,10 +103,9 @@ void Up();
 void Down();
 void rightCycle(carMovement*, float);
 void leftCycle(carMovement*, float);
-void crash(const char*, float);
+void crash(const char*, float, float);
 
 
-void Track(int x, int y, int z);
 static void torus(float inner, float outer, unsigned int pts);
 void Gatemove(time_t time);
 void light_controller(void);
