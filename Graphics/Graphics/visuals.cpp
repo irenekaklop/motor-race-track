@@ -23,6 +23,8 @@ bool redFlag = false;
 bool orangeFlag = false;
 bool greenFlag = true;
 
+int rounds = 0;
+
 float R1 = 13;
 float R2 = 8;
 float C1x = 15;
@@ -105,6 +107,9 @@ void Render()
 	else {
 		BlackLight();
 	}
+
+	cout << "ROUND" << endl;
+	cout << rounds << endl;
 	
 	// Draw a light sphere
 	/*glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, SphAmbDiff[0]);
@@ -277,8 +282,9 @@ void Render()
 
 	if (crashFlag) {
 		crash("CRASH!", 0.05f);
-		cout << "CRASH!!!" << endl;
+		//cout << "CRASH!!!" << endl;
 		if (crashTime < 0) {
+			rounds++;
 			crashTime = current;
 
 			compCarM.acc = 0;
@@ -304,6 +310,7 @@ void Render()
 
 			cout << difftime(crashTime, current) << endl;
 		}
+		crash("CRASH!", 0.05f);
 		cout << difftime(current, crashTime) << endl;
 		if (difftime(current, crashTime) >= 3) {
 			cout << "HERE\n";
@@ -1187,6 +1194,7 @@ void MenuSelection(int choice) {
 
 
 void Restart() {
+	rounds = 0;
 	startingState = true;
 
 	redFlag = false;
