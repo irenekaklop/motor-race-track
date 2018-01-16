@@ -57,6 +57,14 @@ int main(int argc, char* argv[])
 	glutKeyboardFunc(Keyboard);
 	glutSpecialFunc(Arrows);
 
+	glutCreateMenu(MenuSelection);
+	glutAddMenuEntry("Level 1", 1);
+	glutAddMenuEntry("Level 2", 2);
+	glutAddMenuEntry("Level 3", 3);
+	glutAddMenuEntry("Quit", 0);
+
+	glutAttachMenu(GLUT_RIGHT_BUTTON);
+
 
 	//Enter main event handling loop
 	glutMainLoop();
