@@ -25,7 +25,7 @@ float R2 = 8;
 float C1x = 15;
 float C2x = -15;
 //float Cz = -34;
-float Cz = -60;
+float Cz = -40;
 float height = -7.5;
 float offset = 2.5;
 
@@ -38,6 +38,26 @@ float angle = 0;
 time_t current, crashTime, redlight_t, greenlight_t, orangelight_t= -1;
 clock_t redlight, current_cl = -1;
 
+// Values that control the material properties.
+
+GLfloat SphShininess = 10;   // Specular exponent for the spheres.
+GLfloat SphAmbDiff[6][4] = {      // The ambient/diffuse colors of the six spheres 
+   {1.0, 0.0, 0.0, 1.0},         // Red
+   {0.5, 0.5, 0.0, 1.0},         // Yellow
+   {0.0, 0.5, 0.0, 1.0},         // Green
+   {0.0, 0.5, 0.5, 1.0},         // Cyan
+   {0.0, 0.0, 0.5, 1.0},         // Blue
+   {0.5, 0.0, 0.5, 1.0}         // Magenta
+};
+GLfloat SphSpecular[4] = { 1, 1, 1, 1.0 };
+
+// Lighting values
+//GLfloat ambientLight[4] = {0, 100.0, 100.0, 1.0};
+GLfloat Lt0amb[4] = {0.3, 0.3, 0.3, 1.0};
+GLfloat Lt0diff[4] = {1.0, 1.0, 1.0, 1.0};
+GLfloat Lt0spec[4] = {0, 0, Cz, 1.0};
+
+
 int minTime = 1, maxTime = 15;
 
 using namespace std;
@@ -45,18 +65,36 @@ using namespace std;
 
 void Render()
 {
-	//CLEARS FRAME BUFFER ie COLOR BUFFER& DEPTH BUFFER (1.0)
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // Clean up the colour of the window
-														 // and the depth buffer
+	// Clear Color and Depth Buffers
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	glMatrixMode(GL_MODELVIEW);
+	// Reset transformations
 	glLoadIdentity();
-	
+
+	// Set the camera
+	gluLookAt(0.0, 0.0, 3.5, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+
 	current = time(NULL);
 	current_cl = clock();
 	light_controller();
+
+	// Draw a light sphere
+	/*glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, SphAmbDiff[0]);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, SphSpecular);
+	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, SphShininess);*/
+	//glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, SphShininess);
+	//glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, SphSpecular);
+	glPushMatrix();
+	glTranslatef(0, 0, Cz);
+	glColor3f(0, 1, 0);
+	glutSolidSphere(1, 25, 25);
+	glPopMatrix();
+
+
 	//Set position
 
-	cout << compCarM.tx << endl;
+	//cout << compCarM.tx << endl;
 
 	//Track
 
@@ -69,7 +107,7 @@ void Render()
 	(-200, -25)	(-150, -25)
 	*/
 
-
+	glPushMatrix();
 	glColor3f(0.0, 0.0, 1.0);											//make the colour blue (lower)
 	glBegin(GL_QUADS);									
 	glVertex3f(C1x, height,	 Cz-R2+offset);										
@@ -78,13 +116,7 @@ void Render()
 	glVertex3f(-5.0, height, Cz-R2+offset);
 	glEnd();
 	
-	glColor3f(0.0, 0.0, 1.0);											//make the colour blue (lower)
-	glBegin(GL_QUADS);
-	glVertex3f(-20.0, height, 2.5-offset);
-	glVertex3f(-20.0, height, -2.5-offset);
-	glVertex3f(-5.0, height, -2.5-offset);
-	glVertex3f(-5.0, height, 2.5-offset);
-	glEnd();
+	
 	
 	/* DOWN STRAIGHT TRACK
 	(-200, -75)(A)	 (D)(200, -75)
@@ -140,10 +172,13 @@ void Render()
 	glVertex3f(-6.0, height, Cz + R1 + offset - 10);
 	glVertex3f(-6.0, height, Cz + R1 + offset - 9);
 	glEnd();
+
+	glPopMatrix();
+
 	//Semi circle right
 	glPushMatrix();
 	glColor3f(0.0, 0.0, 1.0);
-	glLoadIdentity();
+	//glLoadIdentity();
 
 	glTranslatef(C1x, height, Cz);
 	glRotatef(90, 90, 0, 0);
@@ -153,7 +188,7 @@ void Render()
 	glPopMatrix();
 
 	//Semi circle left
-	glLoadIdentity();
+	//glLoadIdentity();
 	glPushMatrix();
 
 	glTranslatef(C2x, height, Cz);
@@ -167,7 +202,7 @@ void Render()
 
 	/*BRIDGE- PINK Closed
 	*/
-	glLoadIdentity();
+	//glLoadIdentity();
 	glColor3f(1.0, 0.24, 0.75);
 	glBegin(GL_POLYGON);
 	glVertex3f(-5.0, height, Cz - R2 + offset);
@@ -181,7 +216,7 @@ void Render()
 	}
 
 
-	glLoadIdentity();
+	//glLoadIdentity();
 
 	glPushMatrix();
 	glTranslatef(userCarM.tx, height, userCarM.tz);
@@ -215,14 +250,14 @@ void Render()
 
 
 	/*Light*/
-	glLoadIdentity();
+	//glLoadIdentity();
 	glTranslatef(-3, height, Cz-R1-offset-2);
 	glScalef(0.25f, 0.25f, 0.25f);
 	glColor3f(0.749020, 0.749020, 0.749020);                            // Set drawing colour
 	glCallList(lightId);
 
 
-	glLoadIdentity();
+	//glLoadIdentity();
 	glPushMatrix();
 	glTranslatef(0, 0, 0);
 	glColor3f(0.0, 1.0, 1.0);
@@ -302,7 +337,7 @@ void Resize(int w, int h)
 
 	//glOrtho (-50.0f, 50.0f, -50.0f, 50.0f,-1000.0f,1000.0f);
 	float aspect = (float)w / (float)h;
-	gluPerspective(30.0, aspect, 1.0, 500.0);
+	gluPerspective(45.0, aspect, 1.0, 500.0);
 }
 
 
@@ -328,50 +363,27 @@ void Setup()  // TOUCH IT !!
 	glEnable(GL_COLOR_MATERIAL);
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 
-	//Set up light source
-	//SUN
-	/*
-	GLfloat light_position[] = { 0.0, 30.0, 50.0, 0.0 };
+	// Set global ambient light
+	//glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambientLight);   
+	GLfloat light_position[] = { -50, 50.0, 50.0, 0.0 };
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
-	GLfloat ambientLight[] = { 0.3, 0.3, 0.3, 1.0 };
-	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
-
-	//Set up light source
-	//glTranslatef(-3, height, Cz-R1-offset-2);
-	GLfloat green_light_position[] = { -3, height, Cz - R1 - offset-1, 1.0 };
-	glLightfv(GL_LIGHT1, GL_POSITION, green_light_position);
-
-	//EDWWWWWWWW
-	GLfloat specularLight[] = { 0.0, 1.0, 0.0, 1.0 };
-	glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
-	GLfloat specref[] = { 1.0, 1.0, 1.0, 1.0 };
-	glMaterialfv(GL_FRONT, GL_SPECULAR, specref);
-	glMateriali(GL_FRONT, GL_SHININESS, 64);
-
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
-	//glEnable(GL_LIGHT1);
-	*/
-
-	glEnable(GL_COLOR_MATERIAL);
-	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-
-	//Set up light source
-	GLfloat light_position[] = { 0.0, 30.0, 50.0, 0.0 };
-	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-
-	GLfloat ambientLight[] = { 0.3, 0.3, 0.3, 1.0 };
-	GLfloat diffuseLight[] = { 0.8, 0.8, 0.8, 1.0 };
-	GLfloat specularLight[] = { 1.0, 1.0, 1.0, 1.0 };
-
-
+	GLfloat ambientLight[] = { 0.4, 0.4, 0.4, 1.0 };
+	GLfloat diffuseLight[] = { 0.9, 0.9, 0.9, 1.0 };
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
 
+	// Light 1 light values.  Its position is set in Render().
+	//glLightfv(GL_LIGHT1, GL_POSITION, Lt0spec);
+	//glLightfv(GL_LIGHT1, GL_AMBIENT, Lt0amb);
+	//glLightfv(GL_LIGHT1, GL_DIFFUSE, Lt0diff);
+	//glLightfv(GL_LIGHT1, GL_SPECULAR, SphAmbDiff[2]);
 
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
+	
+	//Set up light source
+	glEnable(GL_LIGHTING);      // Enable lighting calculations
+	glEnable(GL_LIGHT0);      // Turn on light #0.
+	//glEnable(GL_LIGHT1);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -883,7 +895,7 @@ void RenderCompCar() {
 
 		}
 	}
-	cout << compCarM.tx << "\t" << compCarM.tz << "\t" << compCarM.theta*180/PI << endl;
+	//cout << compCarM.tx << "\t" << compCarM.tz << "\t" << compCarM.theta*180/PI << endl;
 
 }
 
