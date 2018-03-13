@@ -1,5 +1,5 @@
 # motor-race-track
-###### Implemented in C++ by irene and Tsuyomaru
+###### Implemented in C++ by [irene](https://github.com/irenekaklop) and [Tsuyomaru](https://github.com/tsuyomaru)
 
 
 ## Keys and funtionality
